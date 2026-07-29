@@ -195,7 +195,6 @@
   </style>
 </head>
 <body>
-  <!-- Экран входа -->
   <div id="authScreen" class="auth-screen active">
     <h2 id="authTitle">Вход</h2>
     <input type="email" id="email" placeholder="Email">
@@ -207,7 +206,6 @@
     </div>
   </div>
 
-  <!-- Основное приложение -->
   <div id="app" class="app">
     <div id="mainPanel">
       <div class="header">
@@ -225,17 +223,15 @@
   </div>
 
   <script>
-    // ⚠️ ЗАМЕНИТЕ НА КОНФИГУРАЦИЮ ВАШЕГО НОВОГО ПРОЕКТА
-    const firebaseConfig = {
-      apiKey: "ВАШ_API_KEY",
-      authDomain: "ВАШ_PROJECT.firebaseapp.com",
-      projectId: "ВАШ_PROJECT_ID",
-      storageBucket: "ВАШ_PROJECT.appspot.com",
-      messagingSenderId: "000000000000",
-      appId: "ВАШ_APP_ID"
-    };
-
-    firebase.initializeApp(firebaseConfig);
+    // Конфигурация проекта messenger-bcdd6
+    firebase.initializeApp({
+      apiKey: "AIzaSyBoKOLs5MwXYAjMkl3CtplfVE441IE3vEA",
+      authDomain: "messenger-bcdd6.firebaseapp.com",
+      projectId: "messenger-bcdd6",
+      storageBucket: "messenger-bcdd6.firebasestorage.app",
+      messagingSenderId: "974794455260",
+      appId: "1:974794455260:web:c3367bc6e548718d871c19"
+    });
     const auth = firebase.auth();
     const db = firebase.firestore();
 
@@ -244,7 +240,6 @@
     let currentChat = null;
     let unsubscribe = null;
 
-    // UI
     const authScreen = document.getElementById('authScreen');
     const appEl = document.getElementById('app');
     const authTitle = document.getElementById('authTitle');
