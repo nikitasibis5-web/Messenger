@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Мессенджер</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f0f2f5;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-screen {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      width: 340px;
+      max-width: 90vw;
+      text-align: center;
+      display: none;
+    }
+    .auth-screen.active { display: block; }
+    .auth-screen h2 { margin-bottom: 20px; font-weight: 600; }
+    .auth-screen input {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+    .auth-screen button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      background: #4a7cfe;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .auth-screen .toggle-text { margin-top: 12px; font-size: 0.9rem; color: #666; }
+    .auth-screen .toggle-text span { color: #4a7cfe; cursor: pointer; }
+    .auth-error { color: #e74c3c; font-size: 0.85rem; margin-top: 6px; }
+
+    .app {
+      width: 100%;
+      height: 100vh;
+      display: none;
+      flex-direction: column;
+      background: white;
+      overflow: hidden;
+    }
+    .app.active { display: flex; }
+    .header {
+      background: #4a7cfe;
+      color: white;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h3 { font-weight: 600; }
+    .logout-btn {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.5);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .tabs { display: flex; border-bottom: 1px solid #e0e0e0; }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .tab.active { color: #4a7cfe; border-bottom-color: #4a7cfe; }
+    .list { flex: 1; overflow-y: auto; }
+    .chat-item, .contact-item {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.15s;
+    }
+    .chat-item:active, .contact-item:active { background: #e8edff; }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #4a7cfe;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .chat-info, .contact-info { flex: 1; }
+    .chat-name, .contact-name { font-weight: 500; }
+    .last-msg { font-size: 0.85rem; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .chat-window { display: none; flex-direction: column; height: 100%; }
+    .chat-window.active { display: flex; }
+    .chat-header {
+      padding: 14px;
+      background: #4a7cfe;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0 8px;
+    }
+    .messages {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      background: #f5f6f8;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .msg {
+      max-width: 75%;
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      line-height: 1.3;
+    }
+    .msg.sent {
+      align-self: flex-end;
+      background: #4a7cfe;
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+    .msg.received {
+      align-self: flex-start;
+      background: white;
+      border-bottom-left-radius: 2px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .input-area {
+      padding: 10px;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      gap: 8px;
+    }
+    .input-area input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .input-area button {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #4a7cfe;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .dark-mode { background: #1a1a2e; color: #eee; }
+    .dark-mode .header { background: #16213e; }
+    .dark-mode .auth-screen { background: #222; color: #eee; }
+    .dark-mode .auth-screen input { background: #333; border-color: #555; color: #eee; }
+    .dark-mode .tab.active { color: #4a7cfe; }
+    .dark-mode .list { background: #1a1a2e; }
+    .dark-mode .chat-item, .dark-mode .contact-item { border-bottom-color: #333; }
+    .dark-mode .messages { background: #222; }
+    .dark-mode .msg.received { background: #333; }
+    .dark-mode .input-area { background: #222; border-top-color: #333; }
+    .dark-mode .input-area input { background: #333; border-color: #555; color: #eee; }
+  </style>
+</head>
+<body>
+  <!-- Экран входа -->
+  <div id="authScreen" class="auth-screen active">
+    <h2 id="authTitle">Вход</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Пароль">
+    <div class="auth-error" id="authError"></div>
+    <button onclick="handleAuth()">Войти</button>
+    <div class="toggle-text">
+      <span id="toggleAuth" onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</span>
+    </div>
+  </div>
+
+  <!-- Основное приложение -->
+  <div id="app" class="app">
+    <div id="mainPanel">
+      <div class="header">
+        <h3>Мессенджер</h3>
+        <div style="display:flex; gap:8px;">
+          <button onclick="toggleDarkMode()" style="background:none;border:1px solid rgba(255,255,255,0.5);color:white;padding:4px 10px;border-radius:8px;">🌓</button>
+          <button class="logout-btn" onclick="logout()">Выйти</button>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('chats')">Чаты</div>
+        <div class="tab" onclick="switchTab('contacts')">Контакты</div>
+      </div>
+      <div id="chatList" class="list"></div>
+      <div id="contactList" class="list" style="display:none;"></div>
+    </div>
+    <div id="chatPanel" class="chat-window"></div>
+  </div>
+
+  <script>
+    // ⚠️ ЗАМЕНИТЕ НА КОНФИГУРАЦИЮ ВАШЕГО НОВОГО ПРОЕКТА
+    const firebaseConfig = {
+      apiKey: "ВАШ_API_KEY",
+      authDomain: "ВАШ_PROJECT.firebaseapp.com",
+      projectId: "ВАШ_PROJECT_ID",
+      storageBucket: "ВАШ_PROJECT.appspot.com",
+      messagingSenderId: "000000000000",
+      appId: "ВАШ_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUser = null;
+    let isLogin = true;
+    let currentChat = null;
+    let unsubscribe = null;
+    let darkMode = false;
+
+    // UI
+    const authScreen = document.getElementById('authScreen');
+    const appEl = document.getElementById('app');
+    const authTitle = document.getElementById('authTitle');
+    const authError = document.getElementById('authError');
+    const chatList = document.getElementById('chatList');
+    const contactList = document.getElementById('contactList');
+    const chatPanel = document.getElementById('chatPanel');
+
+    window.toggleMode = () => {
+      isLogin = !isLogin;
+      authTitle.textContent = isLogin ? 'Вход' : 'Регистрация';
+      document.getElementById('toggleAuth').innerHTML = isLogin ? 'Нет аккаунта? <span>Зарегистрироваться</span>' : 'Уже есть аккаунт? <span>Войти</span>';
+    };
+
+    window.handleAuth = async () => {
+      const email = document.getElementById('email').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      authError.textContent = '';
+      try {
+        if (isLogin) {
+          await auth.signInWithEmailAndPassword(email, pass);
+        } else {
+          const cred = await auth.createUserWithEmailAndPassword(email, pass);
+          await db.collection('users').doc(cred.user.uid).set({
+            email, displayName: email.split('@')[0]
+          });
+        }
+      } catch (e) {
+        authError.textContent = e.message;
+      }
+    };
+
+    window.logout = () => auth.signOut();
+
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        currentUser = user;
+        authScreen.classList.remove('active');
+        appEl.classList.add('active');
+        loadContacts();
+        listenChats();
+      } else {
+        currentUser = null;
+        authScreen.classList.add('active');
+        appEl.classList.remove('active');
+        chatPanel.innerHTML = '';
+      }
+    });
+
+    async function loadContacts() {
+      const snap = await db.collection('users').get();
+      contactList.innerHTML = '';
+      snap.forEach(doc => {
+        if (doc.id === currentUser.uid) return;
+        const u = doc.data();
+        const div = document.createElement('div');
+        div.className = 'contact-item';
+        div.innerHTML = `<div class="avatar">${u.displayName.charAt(0)}</div>
+          <div class="contact-info"><div class="contact-name">${u.displayName}</div></div>`;
+        div.onclick = () => openChat(doc.id, u);
+        contactList.appendChild(div);
+      });
+    }
+
+    async function openChat(otherId, otherUser) {
+      const chatId = [currentUser.uid, otherId].sort().join('_');
+      await db.collection('chats').doc(chatId).set({
+        participants: [currentUser.uid, otherId],
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      currentChat = { chatId, otherUser };
+      renderChat();
+    }
+
+    function renderChat() {
+      const u = currentChat.otherUser;
+      chatPanel.innerHTML = `
+        <div class="chat-header">
+          <button class="back-btn" onclick="closeChat()">←</button>
+          <div class="avatar">${u.displayName.charAt(0)}</div>
+          <div style="color:white;font-weight:500;">${u.displayName}</div>
+        </div>
+        <div class="messages" id="msgContainer"></div>
+        <div class="input-area">
+          <input id="msgInput" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')sendMsg()">
+          <button onclick="sendMsg()">➤</button>
+        </div>
+      `;
+      chatPanel.classList.add('active');
+      document.getElementById('mainPanel').style.display = 'none';
+      if (unsubscribe) unsubscribe();
+      unsubscribe = db.collection('chats').doc(currentChat.chatId)
+        .collection('messages').orderBy('timestamp','asc')
+        .onSnapshot(snap => {
+          const container = document.getElementById('msgContainer');
+          if (!container) return;
+          container.innerHTML = '';
+          snap.forEach(doc => {
+            const m = doc.data();
+            const cls = m.senderId === currentUser.uid ? 'sent' : 'received';
+            container.innerHTML += `<div class="msg ${cls}">${m.text}</div>`;
+          });
+          container.scrollTop = container.scrollHeight;
+        });
+    }
+
+    window.closeChat = () => {
+      chatPanel.classList.remove('active');
+      document.getElementById('mainPanel').style.display = 'block';
+      if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    };
+
+    window.sendMsg = async () => {
+      const input = document.getElementById('msgInput');
+      const text = input.value.trim();
+      if (!text || !currentChat) return;
+      await db.collection('chats').doc(currentChat.chatId).collection('messages').add({
+        senderId: currentUser.uid,
+        text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      input.value = '';
+    };
+
+    function listenChats() {
+      db.collection('chats')
+        .where('participants', 'array-contains', currentUser.uid)
+        .orderBy('updatedAt','desc')
+        .onSnapshot(async snap => {
+          const items = [];
+          for (const doc of snap.docs) {
+            const data = doc.data();
+            const otherId = data.participants.find(id => id !== currentUser.uid);
+            if (!otherId) continue;
+            const userDoc = await db.collection('users').doc(otherId).get();
+            if (!userDoc.exists) continue;
+            const u = userDoc.data();
+            const lastSnap = await db.collection('chats').doc(doc.id).collection('messages')
+              .orderBy('timestamp','desc').limit(1).get();
+            let lastMsg = '';
+            lastSnap.forEach(m => lastMsg = m.data().text);
+            items.push({ chatId: doc.id, user: u, lastMsg });
+          }
+          chatList.innerHTML = '';
+          items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'chat-item';
+            div.innerHTML = `<div class="avatar">${item.user.displayName.charAt(0)}</div>
+              <div class="chat-info"><div class="chat-name">${item.user.displayName}</div>
+              <div class="last-msg">${item.lastMsg || 'Нет сообщений'}</div></div>`;
+            div.onclick = () => {
+              currentChat = { chatId: item.chatId, otherUser: item.user };
+              renderChat();
+            };
+            chatList.appendChild(div);
+          });
+        });
+    }
+
+    window.switchTab = (tab) => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      if (tab === 'chats') {
+        document.querySelector('.tab:first-child').classList.add('active');
+        chatList.style.display = 'block';
+        contactList.style.display = 'none';
+      } else {
+        document.querySelector('.tab:last-child').classList.add('active');
+        chatList.style.display = 'none';
+        contactList.style.display = 'block';
+      }
+    };
+
+    window.toggleDarkMode = () => {
+      darkMode = !darkMode;
+      document.body.classList.toggle('dark-mode', darkMode);
+      localStorage.setItem('darkMode', darkMode);
+    };
+
+    // Восстановить тему
+    if (localStorage.getItem('darkMode') === 'true') {
+      darkMode = true;
+      document.body.classList.add('dark-mode');
+    }
+  </script>
+</body>
+</html>
