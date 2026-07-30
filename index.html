@@ -138,7 +138,7 @@
     <div id="chatPanel" class="chat-panel"></div>
   </div>
 
-  <!-- Модальное окно: Добавить контакт -->
+  <!-- Модальные окна (без изменений) -->
   <div id="addContactModal" class="modal">
     <div class="modal-content">
       <h3>Добавить контакт</h3>
@@ -154,7 +154,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно: Создать группу -->
   <div id="createGroupModal" class="modal">
     <div class="modal-content">
       <h3>Создать группу</h3>
@@ -165,7 +164,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно: Создать канал -->
   <div id="createChannelModal" class="modal">
     <div class="modal-content">
       <h3>Создать канал</h3>
@@ -176,7 +174,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно: Редактировать группу -->
   <div id="editGroupModal" class="modal">
     <div class="modal-content">
       <h3>Редактировать группу</h3>
@@ -193,12 +190,10 @@
     </div>
   </div>
 
-  <!-- Модальное окно: Настройки канала -->
   <div id="channelSettingsModal" class="modal">
     <div class="modal-content" id="channelSettingsContent"></div>
   </div>
 
-  <!-- Модальное окно: Отложенное сообщение -->
   <div id="scheduleModal" class="modal">
     <div class="modal-content">
       <h3>Отложенное сообщение</h3>
@@ -209,7 +204,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно: Настройки -->
   <div id="settingsModal" class="modal">
     <div class="modal-content">
       <h3>Настройки</h3>
@@ -228,7 +222,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно: Профиль -->
   <div id="profileModal" class="modal">
     <div class="modal-content">
       <h3>Профиль</h3>
@@ -248,12 +241,10 @@
     </div>
   </div>
 
-  <!-- Модальное окно: Информация о пользователе -->
   <div id="userInfoModal" class="modal">
     <div class="modal-content" id="userInfoContent"></div>
   </div>
 
-  <!-- Модальное окно: Смена номера -->
   <div id="changePhoneModal" class="modal">
     <div class="modal-content">
       <h3>Смена номера</h3>
@@ -527,7 +518,7 @@
       closeEditGroup(); await loadAllChats(); alert('✅ Группа обновлена');
     };
 
-    // ============ CHANNEL SETTINGS (с редактированием) ============
+    // ============ CHANNEL SETTINGS (с приглашением) ============
     window.openChannelSettings = async () => {
       if (!currentChat || !currentChat.otherUser.isChannel) return;
       const chatId = currentChat.chatId;
@@ -546,6 +537,16 @@
           <input type="text" id="editChannelName" placeholder="Название канала" value="${data.groupName || ''}">
           <textarea id="editChannelDesc" rows="3" placeholder="Описание канала">${data.groupDesc || ''}</textarea>
           <button onclick="saveChannelInfo()">💾 Сохранить</button>
+          <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;">
+            <p style="font-weight:600;margin-bottom:8px;">📨 Пригласить в канал</p>
+            <div style="display:flex;gap:4px;">
+              <select id="inviteCountryCode" style="padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);">
+                <option value="+7">+7</option><option value="+380">+380</option><option value="+375">+375</option><option value="+1">+1</option><option value="+44">+44</option><option value="+49">+49</option><option value="+33">+33</option>
+              </select>
+              <input type="tel" id="invitePhone" placeholder="Номер телефона" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);">
+              <button onclick="inviteToChannel()" style="width:auto;padding:8px 12px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;">Пригласить</button>
+            </div>
+          </div>
         `;
       }
       const isCreator = data.creatorId === currentUser.uid;
@@ -563,6 +564,25 @@
       }
       document.getElementById('channelSettingsContent').innerHTML = html;
       document.getElementById('channelSettingsModal').classList.add('active');
+    };
+    window.inviteToChannel = async () => {
+      if (!currentChat || !currentChat.otherUser.isChannel) return;
+      const phone = document.getElementById('invitePhone').value.trim();
+      if (!phone) return alert('Введите номер телефона');
+      const full = (document.getElementById('inviteCountryCode')?.value || '+7') + phone;
+      const snap = await db.collection('users').where('phone','==',full).get();
+      if (snap.empty) { alert('Пользователь не найден'); return; }
+      const userDoc = snap.docs[0];
+      if (userDoc.id === currentUser.uid) { alert('Нельзя пригласить себя'); return; }
+      const chatId = currentChat.chatId;
+      const doc = await db.collection('chats').doc(chatId).get();
+      const data = doc.data();
+      if (data.participants.includes(userDoc.id)) { alert('Уже в канале'); return; }
+      await db.collection('chats').doc(chatId).update({
+        participants: firebase.firestore.FieldValue.arrayUnion(userDoc.id)
+      });
+      alert('✅ Пользователь приглашён');
+      openChannelSettings();
     };
     window.uploadChannelAvatar = (e) => {
       const file = e.target.files[0];
@@ -946,7 +966,6 @@
         if (!otherId || SYSTEM_IDS.includes(otherId)) continue;
         let userData = { displayName:'Контакт', email:'', phone:'' };
         try { const userDoc = await db.collection('users').doc(otherId).get(); if (userDoc.exists) userData = userDoc.data(); else userData.displayName = 'Пользователь '+otherId.substring(0,8); } catch(e){}
-        // ВАЖНО: добавляем ID собеседника, чтобы звонок работал
         userData.id = otherId;
         let lastMsg = '';
         try { const msgs = await db.collection('chats').doc(doc.id).collection('messages').orderBy('timestamp','desc').limit(1).get(); if (!msgs.empty) { const d = msgs.docs[0].data(); lastMsg = d.audio?'[Голосовое]':d.image?'[Фото]':d.video?'[Видео]':(d.text||''); } } catch(e){}
@@ -1093,7 +1112,7 @@
     window.closeSettings = () => document.getElementById('settingsModal').classList.remove('active');
     document.querySelectorAll('.modal').forEach(modal=>modal.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('active'); }));
 
-    // ============ AUDIO CALLS (WebRTC) ============
+    // ============ AUDIO CALLS (WebRTC) – ИСПРАВЛЕНО ============
     window.startCall = async () => {
       if (!currentChat || callInProgress) return;
       if (currentChat.otherUser.isChannel || currentChat.otherUser.isGroup) {
@@ -1151,7 +1170,9 @@
         }
       };
       peerConnection.oniceconnectionstatechange = () => {
-        if (peerConnection && (peerConnection.iceConnectionState==='disconnected'||peerConnection.iceConnectionState==='failed')) endCall();
+        if (peerConnection && (peerConnection.iceConnectionState === 'failed' || peerConnection.iceConnectionState === 'closed')) {
+          endCall();
+        }
       };
     }
     function listenCallDoc(callDocRef) {
@@ -1159,13 +1180,18 @@
       callDocListener = callDocRef.onSnapshot(async (doc) => {
         if (!doc.exists) { endCall(); return; }
         const data = doc.data();
-        if (data.status==='ended') { endCall(); return; }
-        if (data.callerId===currentUser.uid && data.answer && peerConnection && peerConnection.signalingState!=='stable') {
-          await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.answer)));
+        if (data.status === 'ended') { endCall(); return; }
+        if (data.callerId === currentUser.uid && data.answer && peerConnection && peerConnection.signalingState !== 'stable') {
+          try {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.answer)));
+          } catch (e) { console.warn('setRemoteDescription error (answer):', e); }
         }
         if (data.candidates && peerConnection) {
-          for (const candStr of data.candidates) {
-            try { await peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(candStr))); } catch(e){}
+          const currentCandidates = data.candidates;
+          for (const candStr of currentCandidates) {
+            try {
+              await peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(candStr)));
+            } catch (e) {}
           }
         }
       });
@@ -1217,7 +1243,7 @@
     }
     function closeCallUI() { const modal = document.getElementById('callModal'); if (modal) modal.remove(); }
 
-    console.log('Мессенджер готов. Баг с undefined при звонке исправлен.');
+    console.log('Мессенджер готов. Звонки исправлены.');
   </script>
 </body>
 </html>
