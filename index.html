@@ -12,325 +12,72 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f0f2f5;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .auth-screen {
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-      width: 380px;
-      max-width: 90vw;
-      text-align: center;
-      display: none;
-    }
+    body { font-family: 'Inter', sans-serif; background: #f0f2f5; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .auth-screen { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); width: 380px; max-width: 90vw; text-align: center; display: none; }
     .auth-screen.active { display: block; }
     .auth-screen h2 { margin-bottom: 20px; font-weight: 600; color: #1a1a1a; }
-    .auth-screen input, .auth-screen select {
-      width: 100%;
-      padding: 14px 16px;
-      margin: 8px 0;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      font-size: 1rem;
-      outline: none;
-      background: #f9fafb;
-      transition: border 0.2s;
-    }
-    .auth-screen input:focus, .auth-screen select:focus { border-color: #4a7cfe; }
-    .phone-row { display: flex; gap: 8px; }
-    .phone-row select { width: 120px; }
-    .phone-row input { flex: 1; }
-    .auth-screen button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 16px;
-      background: #4a7cfe;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .auth-screen button:hover { background: #3a6ae0; }
+    .auth-screen input, .auth-screen select { width: 100%; padding: 14px 16px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; outline: none; background: #f9fafb; }
+    .auth-screen button { width: 100%; padding: 14px; margin-top: 16px; background: #4a7cfe; color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer; }
     .auth-screen .toggle-text { margin-top: 16px; font-size: 0.9rem; color: #666; }
     .auth-screen .toggle-text span { color: #4a7cfe; cursor: pointer; font-weight: 500; }
     .auth-error { color: #e74c3c; font-size: 0.85rem; margin-top: 6px; }
-
-    .app {
-      width: 100%;
-      height: 100vh;
-      display: none;
-      flex-direction: column;
-      background: white;
-      overflow: hidden;
-    }
+    .app { width: 100%; height: 100vh; display: none; flex-direction: column; background: white; overflow: hidden; }
     .app.active { display: flex; }
-    .header {
-      background: #4a7cfe;
-      color: white;
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    .header { background: #4a7cfe; color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
     .header h3 { font-weight: 600; font-size: 1.2rem; }
-    .header-right { display: flex; gap: 12px; align-items: center; }
-    .icon-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.4rem;
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 8px;
-      transition: background 0.2s;
-    }
+    .header-right { display: flex; gap: 8px; align-items: center; }
+    .icon-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
     .icon-btn:hover { background: rgba(255,255,255,0.2); }
-    .logout-btn {
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white;
-      padding: 6px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 500;
-      transition: background 0.2s;
-    }
-    .logout-btn:hover { background: rgba(255,255,255,0.3); }
-
+    .logout-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
     .tabs { display: flex; border-bottom: 1px solid #e0e0e0; }
-    .tab {
-      flex: 1;
-      text-align: center;
-      padding: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-    }
+    .tab { flex: 1; text-align: center; padding: 14px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; }
     .tab.active { color: #4a7cfe; border-bottom-color: #4a7cfe; }
     .list { flex: 1; overflow-y: auto; }
-    .chat-item, .contact-item {
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      cursor: pointer;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background 0.15s;
-    }
-    .chat-item:active, .contact-item:active { background: #e8edff; }
-    .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #4a7cfe;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 1.2rem;
-      flex-shrink: 0;
-    }
-    .chat-info, .contact-info { flex: 1; min-width: 0; }
-    .chat-name, .contact-name { font-weight: 500; color: #1a1a1a; }
+    .chat-item { padding: 14px 20px; display: flex; align-items: center; gap: 14px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; background: #4a7cfe; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.2rem; flex-shrink: 0; }
+    .chat-info { flex: 1; min-width: 0; }
+    .chat-name { font-weight: 500; color: #1a1a1a; }
     .last-msg { font-size: 0.85rem; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
     .chat-window { display: none; flex-direction: column; height: 100%; }
     .chat-window.active { display: flex; }
-    .chat-header {
-      padding: 14px 20px;
-      background: #4a7cfe;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .back-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0 8px;
-    }
-    .messages {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-      background: #f5f6f8;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .msg {
-      max-width: 75%;
-      padding: 10px 14px;
-      border-radius: 18px;
-      font-size: 0.95rem;
-      line-height: 1.4;
-    }
-    .msg.sent {
-      align-self: flex-end;
-      background: #4a7cfe;
-      color: white;
-      border-bottom-right-radius: 4px;
-    }
-    .msg.received {
-      align-self: flex-start;
-      background: white;
-      border-bottom-left-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-    .input-area {
-      padding: 12px 16px;
-      background: white;
-      border-top: 1px solid #e0e0e0;
-      display: flex;
-      gap: 10px;
-    }
-    .input-area input {
-      flex: 1;
-      padding: 12px 16px;
-      border: 1px solid #ddd;
-      border-radius: 24px;
-      font-size: 0.95rem;
-      outline: none;
-    }
-    .input-area input:focus { border-color: #4a7cfe; }
-    .input-area button {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: none;
-      background: #4a7cfe;
-      color: white;
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .input-area button:hover { background: #3a6ae0; }
-
-    .search-box {
-      padding: 12px 16px;
-      border-bottom: 1px solid #e0e0e0;
-      display: flex;
-      gap: 8px;
-    }
-    .search-box input {
-      flex: 1;
-      padding: 12px 16px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      font-size: 0.9rem;
-    }
-    .search-box button {
-      padding: 12px 20px;
-      background: #4a7cfe;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    .modal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      visibility: hidden;
-      opacity: 0;
-      transition: 0.3s;
-    }
+    .chat-header { padding: 14px 20px; background: #4a7cfe; color: white; display: flex; align-items: center; gap: 14px; }
+    .back-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0 8px; }
+    .messages { flex: 1; padding: 16px; overflow-y: auto; background: #f5f6f8; display: flex; flex-direction: column; gap: 8px; }
+    .msg { max-width: 75%; padding: 10px 14px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; }
+    .msg.sent { align-self: flex-end; background: #4a7cfe; color: white; border-bottom-right-radius: 4px; }
+    .msg.received { align-self: flex-start; background: white; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .input-area { padding: 12px 16px; background: white; border-top: 1px solid #e0e0e0; display: flex; gap: 10px; }
+    .input-area input { flex: 1; padding: 12px 16px; border: 1px solid #ddd; border-radius: 24px; font-size: 0.95rem; outline: none; }
+    .input-area button { width: 44px; height: 44px; border-radius: 50%; border: none; background: #4a7cfe; color: white; font-size: 1.2rem; cursor: pointer; }
+    .search-box { padding: 12px 16px; border-bottom: 1px solid #e0e0e0; display: flex; gap: 8px; }
+    .search-box input { flex: 1; padding: 12px 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.9rem; }
+    .search-box button { padding: 12px 20px; background: #4a7cfe; color: white; border: none; border-radius: 12px; font-weight: 500; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; visibility: hidden; opacity: 0; transition: 0.3s; }
     .modal.active { visibility: visible; opacity: 1; }
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      width: 360px;
-      max-width: 90vw;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-      position: relative;
-    }
+    .modal-content { background: white; padding: 30px; border-radius: 20px; width: 360px; max-width: 90vw; }
     .modal-content h3 { margin-bottom: 20px; font-weight: 600; }
-    .modal-content input, .modal-content select {
-      width: 100%;
-      padding: 14px;
-      margin: 8px 0;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      font-size: 1rem;
-      outline: none;
-    }
-    .modal-content button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 12px;
-      background: #4a7cfe;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+    .modal-content input, .modal-content select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; }
+    .modal-content button { width: 100%; padding: 14px; margin-top: 12px; background: #4a7cfe; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
     .modal-content .secondary-btn { background: #f0f0f0; color: #1a1a1a; }
-    .modal-content .phone-row { display: flex; gap: 8px; }
-    .modal-content .phone-row select { width: 120px; }
-    .modal-content .phone-row input { flex: 1; }
-    .new-code-btn {
-      background: none;
-      border: none;
-      color: #4a7cfe;
-      cursor: pointer;
-      font-size: 0.9rem;
-      margin-top: 8px;
-      text-decoration: underline;
-    }
-    .new-code-btn:disabled { color: #aaa; cursor: not-allowed; text-decoration: none; }
-    .timer-text { font-size: 0.85rem; color: #888; margin-top: 4px; }
+    .new-code-btn { background: none; border: none; color: #4a7cfe; cursor: pointer; font-size: 0.9rem; text-decoration: underline; }
+    .new-code-btn:disabled { color: #aaa; cursor: not-allowed; }
+    .timer-text { font-size: 0.85rem; color: #888; }
   </style>
 </head>
 <body>
   <div id="authScreen" class="auth-screen active">
     <h2 id="authTitle">Вход</h2>
-    <input type="email" id="email" placeholder="Email" autocomplete="email">
-    <input type="password" id="password" placeholder="Пароль" autocomplete="current-password">
+    <input type="email" id="email" placeholder="Email"><input type="password" id="password" placeholder="Пароль">
     <div id="extraFields" style="display:none;">
       <input type="text" id="displayName" placeholder="Ваше имя">
-      <div class="phone-row">
-        <select id="countryCode">
-          <option value="+7">🇷🇺 +7</option>
-          <option value="+380">🇺🇦 +380</option>
-          <option value="+375">🇧🇾 +375</option>
-          <option value="+1">🇺🇸 +1</option>
-          <option value="+44">🇬🇧 +44</option>
-          <option value="+49">🇩🇪 +49</option>
-          <option value="+33">🇫🇷 +33</option>
-        </select>
-        <input type="tel" id="phone" placeholder="Номер телефона">
+      <div style="display:flex;gap:8px;">
+        <select id="countryCode"><option value="+7">🇷🇺 +7</option><option value="+380">🇺🇦 +380</option><option value="+375">🇧🇾 +375</option><option value="+1">🇺🇸 +1</option><option value="+44">🇬🇧 +44</option><option value="+49">🇩🇪 +49</option><option value="+33">🇫🇷 +33</option></select>
+        <input type="tel" id="phone" placeholder="Номер телефона" style="flex:1;">
       </div>
     </div>
     <div class="auth-error" id="authError"></div>
     <button id="authBtn" onclick="handleAuth()">Войти</button>
-    <div class="toggle-text">
-      <span id="toggleAuth" onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</span>
-    </div>
+    <div class="toggle-text"><span onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</span></div>
   </div>
 
   <div id="app" class="app">
@@ -338,18 +85,13 @@
       <div class="header">
         <h3>Мессенджер</h3>
         <div class="header-right">
+          <button class="icon-btn" onclick="createSystemChatsManually()" title="Добавить системные чаты">➕</button>
           <button class="icon-btn" onclick="openProfile()" title="Профиль">👤</button>
           <button class="logout-btn" onclick="logout()">Выйти</button>
         </div>
       </div>
-      <div class="tabs">
-        <div class="tab active" onclick="switchTab('chats')">Чаты</div>
-        <div class="tab" onclick="switchTab('contacts')">Контакты</div>
-      </div>
-      <div id="searchBox" class="search-box" style="display:none;">
-        <input type="tel" id="searchPhone" placeholder="Поиск по номеру">
-        <button onclick="searchByPhone()">Найти</button>
-      </div>
+      <div class="tabs"><div class="tab active" onclick="switchTab('chats')">Чаты</div><div class="tab" onclick="switchTab('contacts')">Контакты</div></div>
+      <div id="searchBox" class="search-box" style="display:none;"><input type="tel" id="searchPhone" placeholder="Поиск по номеру"><button onclick="searchByPhone()">Найти</button></div>
       <div id="chatList" class="list"></div>
       <div id="contactList" class="list" style="display:none;"></div>
     </div>
@@ -357,43 +99,21 @@
   </div>
 
   <div id="profileModal" class="modal">
-    <div class="modal-content">
-      <h3>Профиль</h3>
-      <label>Имя</label>
-      <input type="text" id="profileName">
-      <label>Телефон</label>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span id="profilePhoneDisplay" style="flex:1; padding:14px; background:#f9fafb; border-radius:12px;"></span>
-        <button class="secondary-btn" onclick="openChangePhone()" style="width:auto; padding:14px 20px;">Сменить</button>
-      </div>
-      <button onclick="saveProfile()" style="margin-top:16px;">Сохранить</button>
-      <button class="secondary-btn" onclick="closeProfile()">Отмена</button>
+    <div class="modal-content"><h3>Профиль</h3>
+      <label>Имя</label><input type="text" id="profileName">
+      <label>Телефон</label><div style="display:flex;align-items:center;gap:8px;"><span id="profilePhoneDisplay" style="flex:1;padding:14px;background:#f9fafb;border-radius:12px;"></span><button class="secondary-btn" onclick="openChangePhone()" style="width:auto;padding:14px 20px;">Сменить</button></div>
+      <button onclick="saveProfile()" style="margin-top:16px;">Сохранить</button><button class="secondary-btn" onclick="closeProfile()">Отмена</button>
     </div>
   </div>
 
   <div id="changePhoneModal" class="modal">
-    <div class="modal-content">
-      <h3>Смена номера</h3>
-      <p style="margin-bottom:12px; color:#666; font-size:0.9rem;">Код подтверждения отправлен в чат с Verification.</p>
+    <div class="modal-content"><h3>Смена номера</h3>
+      <p style="margin-bottom:12px;color:#666;font-size:0.9rem;">Код подтверждения отправлен в чат с Verification.</p>
       <input type="text" id="verificationCode" placeholder="Введите код из чата" maxlength="6">
-      <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
-        <button onclick="verifyCode()">Проверить код</button>
-        <button id="newCodeBtn" class="new-code-btn" onclick="requestNewCode()">Новый код</button>
-      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:8px;"><button onclick="verifyCode()">Проверить код</button><button id="newCodeBtn" class="new-code-btn" onclick="requestNewCode()">Новый код</button></div>
       <div id="timerText" class="timer-text"></div>
-      <div id="newPhoneSection" style="display:none; margin-top:16px;">
-        <div class="phone-row">
-          <select id="newCountryCode">
-            <option value="+7">🇷🇺 +7</option>
-            <option value="+380">🇺🇦 +380</option>
-            <option value="+375">🇧🇾 +375</option>
-            <option value="+1">🇺🇸 +1</option>
-            <option value="+44">🇬🇧 +44</option>
-            <option value="+49">🇩🇪 +49</option>
-            <option value="+33">🇫🇷 +33</option>
-          </select>
-          <input type="tel" id="newPhone" placeholder="Новый номер">
-        </div>
+      <div id="newPhoneSection" style="display:none;margin-top:16px;">
+        <div style="display:flex;gap:8px;"><select id="newCountryCode"><option value="+7">🇷🇺 +7</option><option value="+380">🇺🇦 +380</option><option value="+375">🇧🇾 +375</option><option value="+1">🇺🇸 +1</option><option value="+44">🇬🇧 +44</option><option value="+49">🇩🇪 +49</option><option value="+33">🇫🇷 +33</option></select><input type="tel" id="newPhone" placeholder="Новый номер" style="flex:1;"></div>
         <button onclick="confirmNewPhone()" style="margin-top:12px;">Подтвердить новый номер</button>
       </div>
       <button class="secondary-btn" onclick="closeChangePhone()" style="margin-top:8px;">Отмена</button>
@@ -401,361 +121,74 @@
   </div>
 
   <script>
-    firebase.initializeApp({
-      apiKey: "AIzaSyBoKOLs5MwXYAjMkl3CtplfVE441IE3vEA",
-      authDomain: "messenger-bcdd6.firebaseapp.com",
-      projectId: "messenger-bcdd6",
-      storageBucket: "messenger-bcdd6.firebasestorage.app",
-      messagingSenderId: "974794455260",
-      appId: "1:974794455260:web:c3367bc6e548718d871c19"
-    });
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    firebase.initializeApp({apiKey:"AIzaSyBoKOLs5MwXYAjMkl3CtplfVE441IE3vEA",authDomain:"messenger-bcdd6.firebaseapp.com",projectId:"messenger-bcdd6",storageBucket:"messenger-bcdd6.firebasestorage.app",messagingSenderId:"974794455260",appId:"1:974794455260:web:c3367bc6e548718d871c19"});
+    const auth=firebase.auth(),db=firebase.firestore();
+    let currentUser=null,currentUserProfile=null,isLogin=true,currentChat=null,unsubscribe=null,verificationCode=null,codeExpiry=null;
 
-    let currentUser = null;
-    let currentUserProfile = null;
-    let isLogin = true;
-    let currentChat = null;
-    let unsubscribe = null;
-    let verificationCode = null;
-    let codeExpiry = null;
+    const SYSTEM_BOTS={'favorites-bot':{displayName:'⭐ Избранное',email:'favorites@system',phone:''},'verification-bot':{displayName:'🔐 Verification',email:'verify@system',phone:''}};
 
-    const SYSTEM_BOTS = {
-      'favorites-bot': { displayName: '⭐ Избранное', email: 'favorites@system', phone: '' },
-      'verification-bot': { displayName: '🔐 Verification', email: 'verify@system', phone: '' }
-    };
+    window.toggleMode=()=>{isLogin=!isLogin;document.getElementById('authTitle').textContent=isLogin?'Вход':'Регистрация';document.getElementById('authBtn').textContent=isLogin?'Войти':'Зарегистрироваться';document.getElementById('extraFields').style.display=isLogin?'none':'block';document.getElementById('authError').textContent='';};
+    window.handleAuth=async()=>{const e=document.getElementById('email').value.trim(),p=document.getElementById('password').value.trim(),n=document.getElementById('displayName').value.trim(),c=document.getElementById('countryCode').value,ph=document.getElementById('phone').value.trim();if(!e||!p){document.getElementById('authError').textContent='Заполните email и пароль';return;}if(!isLogin&&(!n||!ph)){document.getElementById('authError').textContent='Заполните имя и телефон';return;}try{if(isLogin)await auth.signInWithEmailAndPassword(e,p);else{const cred=await auth.createUserWithEmailAndPassword(e,p);await db.collection('users').doc(cred.user.uid).set({email:e,displayName:n,phone:c+ph});}}catch(err){document.getElementById('authError').textContent=err.message;}};
+    window.logout=()=>auth.signOut();
 
-    const authScreen = document.getElementById('authScreen');
-    const appEl = document.getElementById('app');
-    const authTitle = document.getElementById('authTitle');
-    const authBtn = document.getElementById('authBtn');
-    const authError = document.getElementById('authError');
-    const extraFields = document.getElementById('extraFields');
-    const chatList = document.getElementById('chatList');
-    const contactList = document.getElementById('contactList');
-    const chatPanel = document.getElementById('chatPanel');
-    const searchBox = document.getElementById('searchBox');
-
-    window.toggleMode = () => {
-      isLogin = !isLogin;
-      authTitle.textContent = isLogin ? 'Вход' : 'Регистрация';
-      authBtn.textContent = isLogin ? 'Войти' : 'Зарегистрироваться';
-      extraFields.style.display = isLogin ? 'none' : 'block';
-      document.getElementById('toggleAuth').innerHTML = isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти';
-      authError.textContent = '';
-    };
-
-    window.handleAuth = async () => {
-      const email = document.getElementById('email').value.trim();
-      const pass = document.getElementById('password').value.trim();
-      const displayName = document.getElementById('displayName').value.trim();
-      const countryCode = document.getElementById('countryCode').value;
-      const phone = document.getElementById('phone').value.trim();
-      authError.textContent = '';
-      if (!email || !pass) { authError.textContent = 'Заполните email и пароль'; return; }
-      if (!isLogin && (!displayName || !phone)) { authError.textContent = 'Заполните имя и телефон'; return; }
-      try {
-        if (isLogin) {
-          await auth.signInWithEmailAndPassword(email, pass);
-        } else {
-          const cred = await auth.createUserWithEmailAndPassword(email, pass);
-          await db.collection('users').doc(cred.user.uid).set({
-            email, displayName, phone: countryCode + phone
-          });
-          // Создаём системные чаты при регистрации
-          await createSystemChats(cred.user.uid);
-        }
-      } catch (e) { authError.textContent = e.message; }
-    };
-
-    async function createSystemChats(userId) {
-      for (const [botId, botProfile] of Object.entries(SYSTEM_BOTS)) {
-        await db.collection('users').doc(botId).set(botProfile, { merge: true });
-        const chatId = [userId, botId].sort().join('_');
-        await db.collection('chats').doc(chatId).set({
-          participants: [userId, botId],
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        // Приветственное сообщение от Избранного
-        if (botId === 'favorites-bot') {
-          await db.collection('chats').doc(chatId).collection('messages').add({
-            senderId: botId,
-            text: '📌 Это ваш личный чат для заметок и избранного.',
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        }
-      }
-    }
-
-    window.logout = () => auth.signOut();
-
-    auth.onAuthStateChanged(async user => {
-      if (user) {
-        currentUser = user;
-        const doc = await db.collection('users').doc(user.uid).get();
-        currentUserProfile = doc.exists ? doc.data() : { displayName: user.email.split('@')[0] };
-        // Убедимся, что системные чаты существуют
-        await createSystemChats(user.uid);
-        authScreen.classList.remove('active');
-        appEl.classList.add('active');
-        loadContacts();
-        listenChats();
-      } else {
-        currentUser = null;
-        currentUserProfile = null;
-        authScreen.classList.add('active');
-        appEl.classList.remove('active');
-        chatPanel.innerHTML = '';
-      }
-    });
-
-    async function loadContacts() {
-      const snap = await db.collection('users').get();
-      contactList.innerHTML = '';
-      snap.forEach(doc => {
-        if (doc.id === currentUser.uid || Object.keys(SYSTEM_BOTS).includes(doc.id)) return;
-        const u = doc.data();
-        const div = document.createElement('div');
-        div.className = 'contact-item';
-        div.innerHTML = `<div class="avatar">${(u.displayName||u.email).charAt(0)}</div>
-          <div class="contact-info"><div class="contact-name">${u.displayName||u.email}</div></div>`;
-        div.onclick = () => openChat(doc.id, u);
-        contactList.appendChild(div);
-      });
-    }
-
-    window.searchByPhone = async () => {
-      const phone = document.getElementById('searchPhone').value.trim();
-      if (!phone) return alert('Введите номер');
-      const snap = await db.collection('users').where('phone', '==', phone).get();
-      contactList.innerHTML = '';
-      if (snap.empty) {
-        contactList.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">Не найдено</div>';
-        return;
-      }
-      snap.forEach(doc => {
-        if (doc.id === currentUser.uid) return;
-        const u = doc.data();
-        const div = document.createElement('div');
-        div.className = 'contact-item';
-        div.innerHTML = `<div class="avatar">${(u.displayName||u.email).charAt(0)}</div>
-          <div class="contact-info"><div class="contact-name">${u.displayName||u.email}</div></div>`;
-        div.onclick = () => openChat(doc.id, u);
-        contactList.appendChild(div);
-      });
-    };
-
-    async function openChat(otherId, otherUser) {
-      const chatId = [currentUser.uid, otherId].sort().join('_');
-      await db.collection('chats').doc(chatId).set({
-        participants: [currentUser.uid, otherId],
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-      currentChat = { chatId, otherUser };
-      renderChat();
-    }
-
-    function renderChat() {
-      const u = currentChat.otherUser;
-      const isSystemBot = Object.keys(SYSTEM_BOTS).includes(currentChat.chatId.split('_').find(id => id !== currentUser.uid));
-      chatPanel.innerHTML = `
-        <div class="chat-header">
-          <button class="back-btn" onclick="closeChat()">←</button>
-          <div class="avatar">${(u.displayName||u.email).charAt(0)}</div>
-          <div style="color:white;font-weight:500;">${u.displayName||u.email}</div>
-        </div>
-        <div class="messages" id="msgContainer"></div>
-        <div class="input-area">
-          <input id="msgInput" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')sendMsg()">
-          <button onclick="sendMsg()">➤</button>
-        </div>
-      `;
-      chatPanel.classList.add('active');
-      document.getElementById('mainPanel').style.display = 'none';
-      if (unsubscribe) unsubscribe();
-      unsubscribe = db.collection('chats').doc(currentChat.chatId)
-        .collection('messages').orderBy('timestamp','asc')
-        .onSnapshot(snap => {
-          const container = document.getElementById('msgContainer');
-          if (!container) return;
-          container.innerHTML = '';
-          snap.forEach(doc => {
-            const m = doc.data();
-            const cls = m.senderId === currentUser.uid ? 'sent' : 'received';
-            container.innerHTML += `<div class="msg ${cls}">${m.text}</div>`;
-          });
-          container.scrollTop = container.scrollHeight;
-        });
-    }
-
-    window.closeChat = () => {
-      chatPanel.classList.remove('active');
-      document.getElementById('mainPanel').style.display = 'block';
-      if (unsubscribe) { unsubscribe(); unsubscribe = null; }
-    };
-
-    window.sendMsg = async () => {
-      const input = document.getElementById('msgInput');
-      const text = input.value.trim();
-      if (!text || !currentChat) return;
-      await db.collection('chats').doc(currentChat.chatId).collection('messages').add({
-        senderId: currentUser.uid,
-        text,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      input.value = '';
-    };
-
-    function listenChats() {
-      db.collection('chats')
-        .where('participants', 'array-contains', currentUser.uid)
-        .orderBy('updatedAt','desc')
-        .onSnapshot(async snap => {
-          const items = [];
-          for (const doc of snap.docs) {
-            const data = doc.data();
-            const otherId = data.participants.find(id => id !== currentUser.uid);
-            if (!otherId) continue;
-            const userDoc = await db.collection('users').doc(otherId).get();
-            if (!userDoc.exists) continue;
-            const u = userDoc.data();
-            const lastSnap = await db.collection('chats').doc(doc.id).collection('messages')
-              .orderBy('timestamp','desc').limit(1).get();
-            let lastMsg = '';
-            lastSnap.forEach(m => lastMsg = m.data().text);
-            items.push({ chatId: doc.id, user: u, lastMsg, isSystem: Object.keys(SYSTEM_BOTS).includes(otherId) });
+    // Функция для ручного создания системных чатов (вызывается по кнопке)
+    window.createSystemChatsManually = async () => {
+      if (!currentUser) return;
+      for (const [botId, profile] of Object.entries(SYSTEM_BOTS)) {
+        await db.collection('users').doc(botId).set(profile, { merge: true });
+        const chatId = [currentUser.uid, botId].sort().join('_');
+        const chatRef = db.collection('chats').doc(chatId);
+        const doc = await chatRef.get();
+        if (!doc.exists) {
+          await chatRef.set({ participants: [currentUser.uid, botId], updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+          if (botId === 'favorites-bot') {
+            await chatRef.collection('messages').add({ senderId: botId, text: '📌 Это ваш личный чат для заметок и избранного.', timestamp: firebase.firestore.FieldValue.serverTimestamp() });
           }
-          // Сортируем: сначала системные чаты, потом остальные
-          items.sort((a, b) => b.isSystem - a.isSystem || a.user.displayName.localeCompare(b.user.displayName));
-          chatList.innerHTML = '';
-          items.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'chat-item';
-            div.innerHTML = `<div class="avatar">${(item.user.displayName||item.user.email).charAt(0)}</div>
-              <div class="chat-info"><div class="chat-name">${item.user.displayName||item.user.email}</div>
-              <div class="last-msg">${item.lastMsg||'Нет сообщений'}</div></div>`;
-            div.onclick = () => {
-              currentChat = { chatId: item.chatId, otherUser: item.user };
-              renderChat();
-            };
-            chatList.appendChild(div);
-          });
-        });
-    }
-
-    window.switchTab = tab => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      if (tab === 'chats') {
-        document.querySelector('.tab:first-child').classList.add('active');
-        chatList.style.display = 'block';
-        contactList.style.display = 'none';
-        searchBox.style.display = 'none';
-      } else {
-        document.querySelector('.tab:last-child').classList.add('active');
-        chatList.style.display = 'none';
-        contactList.style.display = 'block';
-        searchBox.style.display = 'flex';
-        loadContacts();
+        }
       }
+      alert('Системные чаты созданы!');
+      listenChats(); // обновляем список
     };
 
-    // Профиль
-    window.openProfile = () => {
-      document.getElementById('profileName').value = currentUserProfile.displayName || '';
-      document.getElementById('profilePhoneDisplay').textContent = currentUserProfile.phone || '';
-      document.getElementById('profileModal').classList.add('active');
-    };
-    window.closeProfile = () => document.getElementById('profileModal').classList.remove('active');
-    window.saveProfile = async () => {
-      const name = document.getElementById('profileName').value.trim();
-      if (!name) return alert('Введите имя');
-      await db.collection('users').doc(currentUser.uid).update({ displayName: name });
-      currentUserProfile.displayName = name;
-      closeProfile();
-    };
-
-    // Смена номера с таймером
-    function updateTimer() {
-      const timerText = document.getElementById('timerText');
-      const newCodeBtn = document.getElementById('newCodeBtn');
-      if (!codeExpiry) {
-        timerText.textContent = '';
-        newCodeBtn.disabled = false;
-        return;
+    auth.onAuthStateChanged(async user=>{
+      if(user){
+        currentUser=user;
+        const doc=await db.collection('users').doc(user.uid).get();
+        currentUserProfile=doc.exists?doc.data():{displayName:user.email.split('@')[0]};
+        document.getElementById('authScreen').classList.remove('active');
+        document.getElementById('app').classList.add('active');
+        loadContacts();listenChats();
+      }else{
+        currentUser=null;currentUserProfile=null;
+        document.getElementById('authScreen').classList.add('active');
+        document.getElementById('app').classList.remove('active');
+        document.getElementById('chatPanel').innerHTML='';
       }
-      const now = Date.now();
-      const remaining = Math.max(0, Math.ceil((codeExpiry - now) / 1000));
-      if (remaining <= 0) {
-        timerText.textContent = '';
-        newCodeBtn.disabled = false;
-        codeExpiry = null;
-      } else {
-        timerText.textContent = `Новый код можно запросить через ${remaining} сек.`;
-        newCodeBtn.disabled = true;
-        setTimeout(updateTimer, 1000);
-      }
-    }
+    });
 
-    window.openChangePhone = async () => {
-      document.getElementById('changePhoneModal').classList.add('active');
-      document.getElementById('newPhoneSection').style.display = 'none';
-      document.getElementById('verificationCode').value = '';
-      document.getElementById('verificationCode').disabled = false;
-      updateTimer();
-      if (!verificationCode || !codeExpiry || Date.now() >= codeExpiry) {
-        await sendVerificationCode();
-      }
-    };
+    async function loadContacts(){const snap=await db.collection('users').get();document.getElementById('contactList').innerHTML='';snap.forEach(doc=>{if(doc.id===currentUser.uid||SYSTEM_BOTS[doc.id])return;const u=doc.data();const div=document.createElement('div');div.className='contact-item';div.innerHTML=`<div class="avatar">${(u.displayName||u.email).charAt(0)}</div><div class="contact-info"><div class="contact-name">${u.displayName||u.email}</div></div>`;div.onclick=()=>openChat(doc.id,u);document.getElementById('contactList').appendChild(div);});}
+    window.searchByPhone=async()=>{const phone=document.getElementById('searchPhone').value.trim();if(!phone)return alert('Введите номер');const snap=await db.collection('users').where('phone','==',phone).get();document.getElementById('contactList').innerHTML='';if(snap.empty){document.getElementById('contactList').innerHTML='<div style="padding:20px;text-align:center;color:#888;">Не найдено</div>';return;}snap.forEach(doc=>{if(doc.id===currentUser.uid)return;const u=doc.data();const div=document.createElement('div');div.className='contact-item';div.innerHTML=`<div class="avatar">${(u.displayName||u.email).charAt(0)}</div><div class="contact-info"><div class="contact-name">${u.displayName||u.email}</div></div>`;div.onclick=()=>openChat(doc.id,u);document.getElementById('contactList').appendChild(div);});};
+    async function openChat(otherId,otherUser){const chatId=[currentUser.uid,otherId].sort().join('_');await db.collection('chats').doc(chatId).set({participants:[currentUser.uid,otherId],updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});currentChat={chatId,otherUser};renderChat();}
+    function renderChat(){const u=currentChat.otherUser;document.getElementById('chatPanel').innerHTML=`<div class="chat-header"><button class="back-btn" onclick="closeChat()">←</button><div class="avatar">${(u.displayName||u.email).charAt(0)}</div><div style="color:white;font-weight:500;">${u.displayName||u.email}</div></div><div class="messages" id="msgContainer"></div><div class="input-area"><input id="msgInput" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')sendMsg()"><button onclick="sendMsg()">➤</button></div>`;document.getElementById('chatPanel').classList.add('active');document.getElementById('mainPanel').style.display='none';if(unsubscribe)unsubscribe();unsubscribe=db.collection('chats').doc(currentChat.chatId).collection('messages').orderBy('timestamp','asc').onSnapshot(snap=>{const container=document.getElementById('msgContainer');if(!container)return;container.innerHTML='';snap.forEach(doc=>{const m=doc.data();const cls=m.senderId===currentUser.uid?'sent':'received';container.innerHTML+=`<div class="msg ${cls}">${m.text}</div>`;});container.scrollTop=container.scrollHeight;});}
+    window.closeChat=()=>{document.getElementById('chatPanel').classList.remove('active');document.getElementById('mainPanel').style.display='block';if(unsubscribe){unsubscribe();unsubscribe=null;}};
+    window.sendMsg=async()=>{const input=document.getElementById('msgInput');const text=input.value.trim();if(!text||!currentChat)return;await db.collection('chats').doc(currentChat.chatId).collection('messages').add({senderId:currentUser.uid,text,timestamp:firebase.firestore.FieldValue.serverTimestamp()});input.value='';};
+    function listenChats(){db.collection('chats').where('participants','array-contains',currentUser.uid).orderBy('updatedAt','desc').onSnapshot(async snap=>{const items=[];for(const doc of snap.docs){const data=doc.data();const otherId=data.participants.find(id=>id!==currentUser.uid);if(!otherId)continue;const userDoc=await db.collection('users').doc(otherId).get();if(!userDoc.exists)continue;const u=userDoc.data();const lastSnap=await db.collection('chats').doc(doc.id).collection('messages').orderBy('timestamp','desc').limit(1).get();let lastMsg='';lastSnap.forEach(m=>lastMsg=m.data().text);items.push({chatId:doc.id,user:u,lastMsg,isSystem:!!SYSTEM_BOTS[otherId]});}
+      items.sort((a,b)=>b.isSystem-a.isSystem||(a.user.displayName||'').localeCompare(b.user.displayName||''));
+      document.getElementById('chatList').innerHTML='';
+      items.forEach(item=>{const div=document.createElement('div');div.className='chat-item';div.innerHTML=`<div class="avatar">${(item.user.displayName||item.user.email).charAt(0)}</div><div class="chat-info"><div class="chat-name">${item.user.displayName||item.user.email}</div><div class="last-msg">${item.lastMsg||'Нет сообщений'}</div></div>`;div.onclick=()=>{currentChat={chatId:item.chatId,otherUser:item.user};renderChat();};document.getElementById('chatList').appendChild(div);});});}
+    window.switchTab=tab=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));if(tab==='chats'){document.querySelector('.tabs .tab:first-child').classList.add('active');document.getElementById('chatList').style.display='block';document.getElementById('contactList').style.display='none';document.getElementById('searchBox').style.display='none';}else{document.querySelector('.tabs .tab:last-child').classList.add('active');document.getElementById('chatList').style.display='none';document.getElementById('contactList').style.display='block';document.getElementById('searchBox').style.display='flex';loadContacts();}};
 
-    async function sendVerificationCode() {
-      verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-      codeExpiry = Date.now() + 60000;
-      updateTimer();
-      const botId = 'verification-bot';
-      const chatId = [currentUser.uid, botId].sort().join('_');
-      await db.collection('chats').doc(chatId).set({
-        participants: [currentUser.uid, botId],
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-      await db.collection('chats').doc(chatId).collection('messages').add({
-        senderId: botId,
-        text: `Ваш код подтверждения: ${verificationCode}`,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      // Открываем чат с Verification
-      const botProfile = SYSTEM_BOTS['verification-bot'];
-      currentChat = { chatId, otherUser: botProfile };
-      renderChat();
-    }
+    window.openProfile=()=>{document.getElementById('profileName').value=currentUserProfile.displayName||'';document.getElementById('profilePhoneDisplay').textContent=currentUserProfile.phone||'';document.getElementById('profileModal').classList.add('active');};
+    window.closeProfile=()=>document.getElementById('profileModal').classList.remove('active');
+    window.saveProfile=async()=>{const name=document.getElementById('profileName').value.trim();if(!name)return alert('Введите имя');await db.collection('users').doc(currentUser.uid).update({displayName:name});currentUserProfile.displayName=name;closeProfile();};
 
-    window.requestNewCode = async () => {
-      if (codeExpiry && Date.now() < codeExpiry) return;
-      await sendVerificationCode();
-    };
-
-    window.closeChangePhone = () => document.getElementById('changePhoneModal').classList.remove('active');
-
-    window.verifyCode = () => {
-      const code = document.getElementById('verificationCode').value.trim();
-      if (code === verificationCode) {
-        document.getElementById('newPhoneSection').style.display = 'block';
-        document.getElementById('verificationCode').disabled = true;
-      } else {
-        alert('Неверный код');
-      }
-    };
-
-    window.confirmNewPhone = async () => {
-      const newCode = document.getElementById('newCountryCode').value;
-      const newPhone = document.getElementById('newPhone').value.trim();
-      if (!newPhone) return alert('Введите номер');
-      const full = newCode + newPhone;
-      await db.collection('users').doc(currentUser.uid).update({ phone: full });
-      currentUserProfile.phone = full;
-      document.getElementById('profilePhoneDisplay').textContent = full;
-      closeChangePhone();
-      document.getElementById('changePhoneModal').classList.remove('active');
-    };
+    function updateTimer(){const btn=document.getElementById('newCodeBtn'),timer=document.getElementById('timerText');if(!codeExpiry){timer.textContent='';btn.disabled=false;return;}const rem=Math.max(0,Math.ceil((codeExpiry-Date.now())/1000));if(rem<=0){timer.textContent='';btn.disabled=false;codeExpiry=null;}else{timer.textContent=`Новый код через ${rem} сек.`;btn.disabled=true;setTimeout(updateTimer,1000);}}
+    window.openChangePhone=async()=>{document.getElementById('changePhoneModal').classList.add('active');document.getElementById('newPhoneSection').style.display='none';document.getElementById('verificationCode').value='';document.getElementById('verificationCode').disabled=false;updateTimer();if(!verificationCode||!codeExpiry||Date.now()>=codeExpiry)await sendVerificationCode();};
+    async function sendVerificationCode(){verificationCode=Math.floor(100000+Math.random()*900000).toString();codeExpiry=Date.now()+60000;updateTimer();const botId='verification-bot',chatId=[currentUser.uid,botId].sort().join('_');await db.collection('chats').doc(chatId).set({participants:[currentUser.uid,botId],updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});await db.collection('chats').doc(chatId).collection('messages').add({senderId:botId,text:`Ваш код подтверждения: ${verificationCode}`,timestamp:firebase.firestore.FieldValue.serverTimestamp()});currentChat={chatId,otherUser:SYSTEM_BOTS[botId]};renderChat();}
+    window.requestNewCode=()=>{if(!codeExpiry||Date.now()>=codeExpiry)sendVerificationCode();};
+    window.closeChangePhone=()=>document.getElementById('changePhoneModal').classList.remove('active');
+    window.verifyCode=()=>{if(document.getElementById('verificationCode').value.trim()===verificationCode){document.getElementById('newPhoneSection').style.display='block';document.getElementById('verificationCode').disabled=true;}else alert('Неверный код');};
+    window.confirmNewPhone=async()=>{const full=document.getElementById('newCountryCode').value+document.getElementById('newPhone').value.trim();if(!full)return alert('Введите номер');await db.collection('users').doc(currentUser.uid).update({phone:full});currentUserProfile.phone=full;document.getElementById('profilePhoneDisplay').textContent=full;document.getElementById('changePhoneModal').classList.remove('active');};
   </script>
 </body>
 </html>
