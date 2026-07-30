@@ -37,71 +37,67 @@
 
     .app { width: 100%; height: 100vh; display: none; flex-direction: column; background: transparent; overflow: hidden; position: relative; z-index: 1; }
     .app.active { display: flex; }
-    .header { background: var(--surface); backdrop-filter: blur(25px); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; opacity: 0.9; }
+    .header { background: var(--surface); backdrop-filter: blur(25px); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; opacity: 0.95; }
     .header h3 { font-weight: 700; font-size: 1.3rem; letter-spacing: 2px; }
-    .header-btns { display: flex; gap: 10px; }
-    .icon-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); width: 42px; height: 42px; border-radius: 14px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+    .header-btns { display: flex; gap: 8px; }
+    .icon-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 12px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
     .icon-btn:hover { background: var(--primary); color: #fff; }
-    .logout-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 14px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+    .logout-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
     .logout-btn:hover { background: var(--primary); color: #fff; }
 
     .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
-    .tab { flex: 1; text-align: center; padding: 16px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; }
+    .tab { flex: 1; text-align: center; padding: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; }
     .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
     .list { flex: 1; overflow-y: auto; }
-    .list-item { margin: 8px 16px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); transition: all 0.3s; }
+    .list-item { margin: 6px 14px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); transition: all 0.3s; }
     .list-item:hover { border-color: var(--primary); transform: translateY(-2px); }
-    .avatar { width: 52px; height: 52px; border-radius: 16px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.3rem; flex-shrink: 0; overflow: hidden; cursor: pointer; }
+    .avatar { width: 48px; height: 48px; border-radius: 14px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0; overflow: hidden; cursor: pointer; }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
     .item-info { flex: 1; min-width: 0; }
-    .item-title { font-weight: 700; font-size: 1rem; }
-    .item-subtitle { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
-    .search-box { padding: 10px 16px; display: flex; gap: 8px; background: var(--surface); border-bottom: 1px solid var(--border); align-items: center; }
-    .phone-row { display: flex; gap: 4px; align-items: center; width: 100%; }
-    .phone-row select { padding: 12px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg); color: var(--text); font-size: 0.85rem; }
-    .phone-row input { flex: 1; padding: 12px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 0.9rem; background: var(--bg); color: var(--text); }
-    .search-btn { padding: 12px 20px; background: var(--primary); color: #fff; border: none; border-radius: 20px; font-weight: 600; cursor: pointer; }
+    .item-title { font-weight: 700; font-size: 0.95rem; }
+    .item-subtitle { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
 
     .chat-panel { display: none; flex-direction: column; height: 100%; }
     .chat-panel.active { display: flex; }
-    .chat-header { background: var(--surface); padding: 18px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); }
-    .back-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 12px; cursor: pointer; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; }
-    .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .chat-header { background: var(--surface); padding: 14px 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .back-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+    .call-btn { background: var(--primary); border: none; color: #fff; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; margin-left: auto; }
+    .messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
     .msg-wrapper { position: relative; display: flex; animation: fadeIn 0.3s ease; }
     .msg-wrapper.sent { justify-content: flex-end; }
     .msg-wrapper.received { justify-content: flex-start; }
-    .msg { max-width: 72%; padding: 14px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; cursor: pointer; transition: opacity 0.5s; }
-    .msg img, .msg video { max-width: 200px; border-radius: 10px; }
-    .msg.sent { background: var(--primary); color: #fff; border-bottom-right-radius: 6px; }
-    .msg.received { background: var(--surface); color: var(--text); border-bottom-left-radius: 6px; border: 1px solid var(--border); }
-    .msg-timer { font-size: 0.65rem; opacity: 0.7; margin-top: 4px; }
-    .save-btn { position: absolute; top: -6px; right: -6px; background: var(--primary); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 0.8rem; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 10; }
+    .msg { max-width: 72%; padding: 12px 16px; border-radius: 16px; font-size: 0.9rem; line-height: 1.4; }
+    .msg img, .msg video { max-width: 180px; border-radius: 8px; }
+    .msg.sent { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
+    .msg.received { background: var(--surface); color: var(--text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+    .msg-timer { font-size: 0.6rem; opacity: 0.7; margin-top: 3px; }
+    .save-btn { position: absolute; top: -5px; right: -5px; background: var(--primary); color: #fff; border: none; width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 10; }
     .msg-wrapper:hover .save-btn { display: flex; }
-    .typing-indicator { font-size: 0.8rem; color: var(--text-secondary); padding: 4px 20px; font-style: italic; }
-    .attach-btn { background: transparent; border: 1px solid var(--border); color: var(--text); width: 40px; height: 40px; border-radius: 50%; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .tools-panel { display: none; flex-wrap: wrap; gap: 8px; padding: 8px 20px; background: var(--surface); border-top: 1px solid var(--border); }
+    .typing-indicator { font-size: 0.75rem; color: var(--text-secondary); padding: 3px 18px; font-style: italic; }
+    .attach-btn { background: transparent; border: 1px solid var(--border); color: var(--text); width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .tools-panel { display: none; flex-wrap: wrap; gap: 6px; padding: 6px 16px; background: var(--surface); border-top: 1px solid var(--border); }
     .tools-panel.active { display: flex; }
-    .tool-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .tool-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 16px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
     .tool-btn:hover { background: var(--primary); color: #fff; }
     .tool-btn.recording { background: #e74c3c; color: #fff; border-color: #e74c3c; animation: pulse 1s infinite; }
     @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .input-area { padding: 14px 20px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .input-area input { flex: 1; min-width: 150px; padding: 14px 20px; border: 1px solid var(--border); border-radius: 30px; font-size: 0.95rem; outline: none; background: var(--bg); color: var(--text); }
-    .input-area button { height: 50px; border-radius: 30px; border: none; background: var(--primary); color: #fff; font-size: 1.2rem; cursor: pointer; padding: 0 16px; white-space: nowrap; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .input-area { padding: 10px 16px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+    .input-area input { flex: 1; min-width: 120px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 24px; font-size: 0.9rem; outline: none; background: var(--bg); color: var(--text); }
+    .input-area button { height: 44px; border-radius: 24px; border: none; background: var(--primary); color: #fff; font-size: 1.1rem; cursor: pointer; padding: 0 14px; white-space: nowrap; }
 
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; visibility: hidden; opacity: 0; transition: 0.3s; }
     .modal.active { visibility: visible; opacity: 1; }
-    .modal-content { background: var(--surface); padding: 30px; border-radius: 24px; width: 380px; max-width: 90vw; color: var(--text); border: 1px solid var(--border); }
-    .modal-content h3 { margin-bottom: 20px; font-weight: 700; font-size: 1.3rem; }
-    .modal-content input, .modal-content textarea { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid var(--border); border-radius: 14px; font-size: 0.95rem; background: var(--bg); color: var(--text); resize: vertical; }
-    .modal-content button { width: 100%; padding: 14px; margin-top: 12px; background: var(--primary); color: #fff; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; }
+    .modal-content { background: var(--surface); padding: 28px; border-radius: 20px; width: 360px; max-width: 90vw; color: var(--text); border: 1px solid var(--border); }
+    .modal-content h3 { margin-bottom: 16px; font-weight: 700; font-size: 1.2rem; }
+    .modal-content input, .modal-content textarea { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid var(--border); border-radius: 12px; font-size: 0.9rem; background: var(--bg); color: var(--text); resize: vertical; }
+    .modal-content button { width: 100%; padding: 12px; margin-top: 10px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
     .btn-secondary { background: var(--border); color: var(--text); }
-    .theme-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
-    .theme-opt { padding: 12px 8px; border-radius: 14px; border: 2px solid var(--border); cursor: pointer; text-align: center; font-weight: 600; font-size: 0.7rem; transition: all 0.3s; }
+    .theme-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+    .theme-opt { padding: 10px 6px; border-radius: 12px; border: 2px solid var(--border); cursor: pointer; text-align: center; font-weight: 600; font-size: 0.65rem; transition: all 0.3s; }
     .theme-opt.active { border-color: var(--primary); background: var(--bg); }
-    .profile-avatar-upload { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 16px; cursor: pointer; background: var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .profile-avatar-upload { width: 70px; height: 70px; border-radius: 50%; margin: 0 auto 14px; cursor: pointer; background: var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .profile-avatar-upload img { width: 100%; height: 100%; object-fit: cover; }
   </style>
 </head>
@@ -120,7 +116,7 @@
 
   <div id="app" class="app">
     <div id="mainPanel">
-      <div class="header"><h3>Сообщения</h3><div class="header-btns"><button class="icon-btn" onclick="refreshChats()" title="Обновить чаты">🔄</button><button class="icon-btn" onclick="openSettings()">⚙️</button><button class="icon-btn" onclick="openProfile()">👤</button><button class="logout-btn" onclick="logout()">Выйти</button></div></div>
+      <div class="header"><h3>Сообщения</h3><div class="header-btns"><button class="icon-btn" onclick="openAddContact()" title="Добавить контакт">➕</button><button class="icon-btn" onclick="openSettings()">⚙️</button><button class="icon-btn" onclick="openProfile()">👤</button><button class="logout-btn" onclick="logout()">Выйти</button></div></div>
       <div class="tabs"><div class="tab active" onclick="switchTab('chats')">Чаты</div><div class="tab" onclick="switchTab('contacts')">Контакты</div><div class="tab" onclick="switchTab('system')">Системные</div></div>
       <div id="chatList" class="list"></div>
       <div id="contactList" class="list" style="display:none;"></div>
@@ -129,80 +125,79 @@
     <div id="chatPanel" class="chat-panel"></div>
   </div>
 
+  <div id="addContactModal" class="modal"><div class="modal-content"><h3>Добавить контакт</h3><div class="phone-row" style="display:flex;gap:4px;margin-bottom:8px;"><select id="addCountryCode" style="padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);">${[{code:'+7',name:'🇷🇺 +7'},{code:'+380',name:'🇺🇦 +380'},{code:'+375',name:'🇧🇾 +375'},{code:'+1',name:'🇺🇸 +1'},{code:'+44',name:'🇬🇧 +44'},{code:'+49',name:'🇩🇪 +49'},{code:'+33',name:'🇫🇷 +33'},{code:'+39',name:'🇮🇹 +39'},{code:'+34',name:'🇪🇸 +34'},{code:'+86',name:'🇨🇳 +86'},{code:'+81',name:'🇯🇵 +81'},{code:'+82',name:'🇰🇷 +82'}].map(c=>`<option value="${c.code}">${c.name}</option>`).join('')}</select><input type="tel" id="addPhone" placeholder="Номер" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);"></div><button onclick="addContactByPhone()">Найти и добавить</button><button class="btn-secondary" onclick="closeAddContact()" style="margin-top:6px;">Отмена</button></div></div>
   <div id="scheduleModal" class="modal"><div class="modal-content"><h3>Отложенное</h3><input type="text" id="scheduleText" placeholder="Текст"><input type="datetime-local" id="scheduleTime"><button onclick="sendScheduled()">Запланировать</button><button class="btn-secondary" onclick="closeSchedule()">Отмена</button></div></div>
-  <div id="settingsModal" class="modal"><div class="modal-content"><h3>Настройки</h3><p style="color:var(--text-secondary);">Тема</p><div class="theme-options"><div class="theme-opt active" onclick="setTheme('default')">☀️</div><div class="theme-opt" onclick="setTheme('dark')">🌙</div><div class="theme-opt" onclick="setTheme('cyberforce')">🌿</div><div class="theme-opt" onclick="setTheme('cherry')">🍒</div><div class="theme-opt" onclick="setTheme('ocean')">🌊</div><div class="theme-opt" onclick="setTheme('caramel')">☕</div></div><button class="btn-secondary" onclick="closeSettings()" style="margin-top:20px;">Закрыть</button></div></div>
-  <div id="profileModal" class="modal"><div class="modal-content"><h3>Профиль</h3><div class="profile-avatar-upload" onclick="document.getElementById('avatarInput').click()"><img id="profileAvatar" src="" style="display:none;"><span id="avatarPlaceholder" style="font-size:2rem;">📷</span></div><input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)"><label>Имя</label><input type="text" id="profileName"><label>О себе</label><textarea id="profileBio" rows="3" placeholder="Расскажите о себе..."></textarea><label>Телефон</label><div style="display:flex;align-items:center;gap:10px;"><span id="profilePhone" style="flex:1;padding:14px;background:var(--bg);border-radius:14px;"></span><button class="btn-secondary" onclick="openChangePhone()" style="width:auto;padding:14px 20px;">Сменить</button></div><button onclick="saveProfile()" style="margin-top:16px;">Сохранить</button><button class="btn-secondary" onclick="closeProfile()">Отмена</button></div></div>
+  <div id="settingsModal" class="modal"><div class="modal-content"><h3>Настройки</h3><p style="color:var(--text-secondary);">Тема</p><div class="theme-options"><div class="theme-opt active" onclick="setTheme('default')">☀️</div><div class="theme-opt" onclick="setTheme('dark')">🌙</div><div class="theme-opt" onclick="setTheme('cyberforce')">🌿</div><div class="theme-opt" onclick="setTheme('cherry')">🍒</div><div class="theme-opt" onclick="setTheme('ocean')">🌊</div><div class="theme-opt" onclick="setTheme('caramel')">☕</div></div><button class="btn-secondary" onclick="closeSettings()" style="margin-top:16px;">Закрыть</button></div></div>
+  <div id="profileModal" class="modal"><div class="modal-content"><h3>Профиль</h3><div class="profile-avatar-upload" onclick="document.getElementById('avatarInput').click()"><img id="profileAvatar" src="" style="display:none;"><span id="avatarPlaceholder" style="font-size:1.8rem;">📷</span></div><input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)"><label>Имя</label><input type="text" id="profileName"><label>О себе</label><textarea id="profileBio" rows="2" placeholder="Расскажите о себе..."></textarea><label>Телефон</label><div style="display:flex;align-items:center;gap:8px;"><span id="profilePhone" style="flex:1;padding:12px;background:var(--bg);border-radius:12px;"></span><button class="btn-secondary" onclick="openChangePhone()" style="width:auto;padding:12px 16px;">Сменить</button></div><button onclick="saveProfile()" style="margin-top:14px;">Сохранить</button><button class="btn-secondary" onclick="closeProfile()">Отмена</button></div></div>
   <div id="userInfoModal" class="modal"><div class="modal-content" id="userInfoContent"></div></div>
-  <div id="changePhoneModal" class="modal"><div class="modal-content"><h3>Смена номера</h3><p style="color:var(--text-secondary);font-size:0.9rem;">Код отправлен в чат Verification</p><input type="text" id="verificationCode" placeholder="Введите код"><div style="display:flex;gap:10px;margin-top:10px;"><button onclick="verifyCode()">Проверить</button><button id="newCodeBtn" style="background:none;border:none;color:var(--primary);" onclick="requestNewCode()">Новый код</button></div><div id="timerText" style="font-size:0.85rem;color:var(--text-secondary);margin-top:6px;"></div><div id="newPhoneSection" style="display:none;margin-top:14px;"><input type="tel" id="newPhone" placeholder="Новый номер"><button onclick="confirmNewPhone()" style="margin-top:10px;">Подтвердить</button></div><button class="btn-secondary" onclick="closeChangePhone()" style="margin-top:10px;">Отмена</button></div></div>
+  <div id="changePhoneModal" class="modal"><div class="modal-content"><h3>Смена номера</h3><p style="color:var(--text-secondary);font-size:0.85rem;">Код отправлен в чат Verification</p><input type="text" id="verificationCode" placeholder="Введите код"><div style="display:flex;gap:8px;margin-top:8px;"><button onclick="verifyCode()">Проверить</button><button id="newCodeBtn" style="background:none;border:none;color:var(--primary);" onclick="requestNewCode()">Новый код</button></div><div id="timerText" style="font-size:0.8rem;color:var(--text-secondary);margin-top:4px;"></div><div id="newPhoneSection" style="display:none;margin-top:12px;"><input type="tel" id="newPhone" placeholder="Новый номер"><button onclick="confirmNewPhone()" style="margin-top:8px;">Подтвердить</button></div><button class="btn-secondary" onclick="closeChangePhone()" style="margin-top:8px;">Отмена</button></div></div>
 
   <script>
+    // Частицы
+    (()=>{const c=document.getElementById('particles');for(let i=0;i<40;i++){const p=document.createElement('div');p.className='particle';const s=Math.random()*4+2;p.style.width=s+'px';p.style.height=s+'px';p.style.left=Math.random()*100+'%';p.style.animationDuration=Math.random()*15+10+'s';p.style.animationDelay=Math.random()*10+'s';c.appendChild(p);}})();
+
     firebase.initializeApp({apiKey:"AIzaSyBoKOLs5MwXYAjMkl3CtplfVE441IE3vEA",authDomain:"messenger-bcdd6.firebaseapp.com",projectId:"messenger-bcdd6",storageBucket:"messenger-bcdd6.firebasestorage.app",messagingSenderId:"974794455260",appId:"1:974794455260:web:c3367bc6e548718d871c19"});
     const auth=firebase.auth(),db=firebase.firestore();
     let currentUser=null,currentUserProfile=null,isLogin=true,currentChat=null,unsubscribe=null,verificationCode=null,codeExpiry=null;
-    let msgTimer='off',customSeconds=0,timerInterval=null,typingTimeout=null,mediaRecorder=null,audioChunks=[],isRecording=false;
+    let msgTimer='off',timerInterval=null,typingTimeout=null,mediaRecorder=null,audioChunks=[],isRecording=false;
 
-    const NO_SAVE_IDS=['verification-bot','saved-bot'];
-    const READONLY_IDS=['verification-bot','saved-bot'];
     const SYSTEM_BOTS={'favorites-bot':{displayName:'⭐ Избранное',email:'fav@sys',phone:''},'verification-bot':{displayName:'🔐 Verification',email:'ver@sys',phone:''},'saved-bot':{displayName:'💾 Сохранённые',email:'saved@sys',phone:''}};
     const SYSTEM_IDS=Object.keys(SYSTEM_BOTS);
-    const COUNTRY_CODES=[{code:'+7',name:'🇷🇺 +7'},{code:'+380',name:'🇺🇦 +380'},{code:'+375',name:'🇧🇾 +375'},{code:'+1',name:'🇺🇸 +1'},{code:'+44',name:'🇬🇧 +44'},{code:'+49',name:'🇩🇪 +49'},{code:'+33',name:'🇫🇷 +33'},{code:'+39',name:'🇮🇹 +39'},{code:'+34',name:'🇪🇸 +34'},{code:'+86',name:'🇨🇳 +86'},{code:'+81',name:'🇯🇵 +81'},{code:'+82',name:'🇰🇷 +82'}];
     const THEMES=['default','dark','cyberforce','cherry','ocean','caramel'];
 
-    function applyTheme(t){document.body.classList.remove(...THEMES);if(t!=='default')document.body.classList.add(t);localStorage.setItem('theme',t);updateThemeUI();}
-    function updateThemeUI(){const t=localStorage.getItem('theme')||'default';document.querySelectorAll('.theme-opt').forEach(o=>o.classList.remove('active'));const idx=THEMES.indexOf(t);if(idx>=0)document.querySelectorAll('.theme-opt')[idx]?.classList.add('active');}
+    function applyTheme(t){document.body.classList.remove(...THEMES);if(t!=='default')document.body.classList.add(t);localStorage.setItem('theme',t);}
     window.setTheme=t=>applyTheme(t);applyTheme(localStorage.getItem('theme')||'default');
 
-    function isSaveDisabled(){if(!currentChat)return true;const otherId=currentChat.chatId.split('_').find(id=>id!==currentUser.uid);return NO_SAVE_IDS.includes(otherId)||otherId===currentUser.uid;}
-    function isReadonly(){if(!currentChat)return true;const otherId=currentChat.chatId.split('_').find(id=>id!==currentUser.uid);return READONLY_IDS.includes(otherId);}
-
     window.toggleMode=()=>{isLogin=!isLogin;document.getElementById('authTitle').textContent=isLogin?'Вход':'Регистрация';document.getElementById('authBtn').textContent=isLogin?'Войти':'Зарегистрироваться';document.getElementById('extraFields').style.display=isLogin?'none':'block';};
-    window.handleAuth=async()=>{const e=document.getElementById('email').value.trim(),p=document.getElementById('password').value.trim(),n=document.getElementById('displayName').value.trim(),ph=document.getElementById('phone').value.trim();if(!e||!p)return document.getElementById('authError').textContent='Заполните email и пароль';if(!isLogin&&!n)return document.getElementById('authError').textContent='Введите имя';if(!isLogin&&(!ph||!/^[\d()+-\s]*$/.test(ph)))return document.getElementById('authError').textContent='Телефон должен содержать только цифры';try{if(isLogin)await auth.signInWithEmailAndPassword(e,p);else{const c=await auth.createUserWithEmailAndPassword(e,p);await db.collection('users').doc(c.user.uid).set({email:e,displayName:n,phone:ph,bio:'',photoURL:''});}}catch(err){document.getElementById('authError').textContent=err.message;}};
+    window.handleAuth=async()=>{const e=document.getElementById('email').value.trim(),p=document.getElementById('password').value.trim(),n=document.getElementById('displayName').value.trim(),ph=document.getElementById('phone').value.trim();if(!e||!p)return document.getElementById('authError').textContent='Заполните email и пароль';if(!isLogin&&!n)return document.getElementById('authError').textContent='Введите имя';if(!isLogin&&(!ph||!/^[\d()+-\s]*$/.test(ph)))return document.getElementById('authError').textContent='Телефон должен содержать только цифры';try{if(isLogin)await auth.signInWithEmailAndPassword(e,p);else{const c=await auth.createUserWithEmailAndPassword(e,p);await db.collection('users').doc(c.user.uid).set({email:e,displayName:n,phone:ph,bio:'',photoURL:''});if(confirm('Загрузить контакты с телефона?'))importContacts();}}catch(err){document.getElementById('authError').textContent=err.message;}};
     window.logout=()=>auth.signOut();
+
+    window.importContacts=async()=>{try{const contacts=await navigator.contacts?.select(['name','tel'],{multiple:true});if(contacts){for(const c of contacts){if(c.tel&&c.tel[0]){const phone=c.tel[0].replace(/\D/g,'');const snap=await db.collection('users').where('phone','==',phone).get();snap.forEach(doc=>{if(doc.id!==currentUser.uid)openChat(doc.id,doc.data());});}}}else{alert('Импорт контактов не поддерживается браузером');}}catch(e){console.log('Ошибка импорта:',e);}};
 
     async function ensureSystemChats(uid){for(const[botId,profile]of Object.entries(SYSTEM_BOTS)){await db.collection('users').doc(botId).set(profile,{merge:true});const chatId=[uid,botId].sort().join('_');const ref=db.collection('chats').doc(chatId);if(!(await ref.get()).exists){await ref.set({participants:[uid,botId],updatedAt:firebase.firestore.FieldValue.serverTimestamp()});if(botId==='favorites-bot')await ref.collection('messages').add({senderId:botId,text:'📌 Ваш личный чат для заметок',timestamp:firebase.firestore.FieldValue.serverTimestamp()});if(botId==='saved-bot')await ref.collection('messages').add({senderId:botId,text:'💾 Здесь будут ваши сохранённые сообщения',timestamp:firebase.firestore.FieldValue.serverTimestamp()});}}}
 
-    auth.onAuthStateChanged(async user=>{if(user){currentUser=user;const d=await db.collection('users').doc(user.uid).get();currentUserProfile=d.exists?d.data():{displayName:user.email.split('@')[0],bio:'',photoURL:''};await ensureSystemChats(user.uid);document.getElementById('authScreen').classList.remove('active');document.getElementById('app').classList.add('active');loadSystemList();refreshChats();if(isLogin&&'contacts' in navigator)askForContacts();}else{currentUser=null;document.getElementById('authScreen').classList.add('active');document.getElementById('app').classList.remove('active');document.getElementById('chatPanel').innerHTML='';}});
-
-    async function askForContacts(){try{const contacts=await navigator.contacts.select(['name','tel'],{multiple:true});if(contacts.length>0){const phones=contacts.map(c=>c.tel?.replace(/\D/g,'')).filter(Boolean);const snap=await db.collection('users').where('phone','in',phones).get();const found=[];snap.forEach(doc=>{if(doc.id!==currentUser.uid)found.push(doc.data().displayName);});if(found.length>0)alert('В мессенджере уже есть: '+found.join(', '));else alert('Никого из контактов не найдено. Пригласите друзей!');}}catch(e){/* пользователь отказал */}}
+    auth.onAuthStateChanged(async user=>{if(user){currentUser=user;const d=await db.collection('users').doc(user.uid).get();currentUserProfile=d.exists?d.data():{displayName:user.email.split('@')[0],bio:'',photoURL:''};await ensureSystemChats(user.uid);document.getElementById('authScreen').classList.remove('active');document.getElementById('app').classList.add('active');loadSystemList();listenChats();}else{currentUser=null;document.getElementById('authScreen').classList.add('active');document.getElementById('app').classList.remove('active');document.getElementById('chatPanel').innerHTML='';}});
 
     async function loadSystemList(){document.getElementById('systemList').innerHTML='';for(const[botId,profile]of Object.entries(SYSTEM_BOTS)){const botDoc=await db.collection('users').doc(botId).get();if(botDoc.exists){const u=botDoc.data();const div=document.createElement('div');div.className='list-item';div.innerHTML=`<div class="avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.displayName||u.email).charAt(0)}</div><div class="item-info"><div class="item-title">${u.displayName||u.email}</div></div>`;div.onclick=()=>openChat(botId,u);document.getElementById('systemList').appendChild(div);}}}
 
-    async function loadContacts(query){document.getElementById('contactList').innerHTML=`<div class="search-box"><div class="phone-row"><select id="countryCode">${COUNTRY_CODES.map(c=>`<option value="${c.code}">${c.name}</option>`).join('')}</select><input type="tel" id="searchPhone" placeholder="Введите номер"></div><button class="search-btn" onclick="searchByPhone()">Найти</button></div>`;if(query){const snap=await db.collection('users').where('phone','==',query).get();const list=document.getElementById('contactList');if(snap.empty){list.innerHTML+='<div style="padding:20px;text-align:center;color:var(--text-secondary);">Не найдено</div>';return;}snap.forEach(doc=>{if(doc.id===currentUser.uid)return;const u=doc.data();const div=document.createElement('div');div.className='list-item';div.innerHTML=`<div class="avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.displayName||u.email).charAt(0)}</div><div class="item-info"><div class="item-title">${u.displayName||u.email}</div>${u.bio?`<div class="item-subtitle">${u.bio}</div>`:''}</div>`;div.onclick=()=>openChat(doc.id,u);list.appendChild(div);});}}
+    window.openAddContact=()=>document.getElementById('addContactModal').classList.add('active');
+    window.closeAddContact=()=>document.getElementById('addContactModal').classList.remove('active');
+    window.addContactByPhone=async()=>{const code=document.getElementById('addCountryCode').value;const phone=document.getElementById('addPhone').value.trim();if(!phone)return;const full=code+phone;const snap=await db.collection('users').where('phone','==',full).get();if(snap.empty){alert('Контакт не найден');return;}snap.forEach(doc=>{if(doc.id!==currentUser.uid){openChat(doc.id,doc.data());closeAddContact();}});};
+
+    async function loadContacts(query){document.getElementById('contactList').innerHTML=`<div class="search-box" style="padding:10px 16px;display:flex;gap:8px;"><div class="phone-row" style="display:flex;gap:4px;width:100%;"><select id="countryCode">${[{code:'+7',name:'🇷🇺 +7'},{code:'+380',name:'🇺🇦 +380'},{code:'+375',name:'🇧🇾 +375'},{code:'+1',name:'🇺🇸 +1'},{code:'+44',name:'🇬🇧 +44'},{code:'+49',name:'🇩🇪 +49'},{code:'+33',name:'🇫🇷 +33'},{code:'+39',name:'🇮🇹 +39'},{code:'+34',name:'🇪🇸 +34'},{code:'+86',name:'🇨🇳 +86'},{code:'+81',name:'🇯🇵 +81'},{code:'+82',name:'🇰🇷 +82'}].map(c=>`<option value="${c.code}">${c.name}</option>`).join('')}</select><input type="tel" id="searchPhone" placeholder="Введите номер" style="flex:1;"></div><button class="search-btn" onclick="searchByPhone()" style="padding:10px 16px;background:var(--primary);color:#fff;border:none;border-radius:16px;">Найти</button></div>`;if(query){const snap=await db.collection('users').where('phone','==',query).get();if(snap.empty){document.getElementById('contactList').innerHTML+='<div style="padding:20px;text-align:center;color:var(--text-secondary);">Не найдено</div>';return;}snap.forEach(doc=>{if(doc.id===currentUser.uid)return;const u=doc.data();const div=document.createElement('div');div.className='list-item';div.innerHTML=`<div class="avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.displayName||u.email).charAt(0)}</div><div class="item-info"><div class="item-title">${u.displayName||u.email}</div></div>`;div.onclick=()=>openChat(doc.id,u);document.getElementById('contactList').appendChild(div);});}}
     window.searchByPhone=()=>{const code=document.getElementById('countryCode')?.value||'+7';const phone=document.getElementById('searchPhone')?.value.trim();if(phone)loadContacts(code+phone);};
 
     window.showUserInfo=async(uid)=>{const doc=await db.collection('users').doc(uid).get();if(doc.exists){const u=doc.data();document.getElementById('userInfoContent').innerHTML=`<h3>${u.displayName||'Пользователь'}</h3><p><strong>О себе:</strong> ${u.bio||'Не указано'}</p><p><strong>Телефон:</strong> ${u.phone||'Не указан'}</p><button class="btn-secondary" onclick="document.getElementById('userInfoModal').classList.remove('active')">Закрыть</button>`;document.getElementById('userInfoModal').classList.add('active');}};
 
-    async function openChat(otherId,otherUser){const chatId=[currentUser.uid,otherId].sort().join('_');await db.collection('chats').doc(chatId).set({participants:[currentUser.uid,otherId],updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});currentChat={chatId,otherUser};renderChat();refreshChats();}
-    
+    async function openChat(otherId,otherUser){const chatId=[currentUser.uid,otherId].sort().join('_');await db.collection('chats').doc(chatId).set({participants:[currentUser.uid,otherId],updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});currentChat={chatId,otherUser};renderChat();}
+
+    window.startCall=async()=>{if(!currentChat)return;const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:true});alert('Звонок начат (WebRTC демо). В реальном приложении здесь было бы пиринговое соединение.');};
+
     window.toggleTools=()=>{const panel=document.getElementById('toolsPanel');if(panel)panel.classList.toggle('active');};
     window.toggleVoice=async()=>{const btn=document.getElementById('voiceBtn');if(isRecording){mediaRecorder.stop();isRecording=false;btn?.classList.remove('recording');btn.innerHTML='🎵 Голосовое';}else{const stream=await navigator.mediaDevices.getUserMedia({audio:true});mediaRecorder=new MediaRecorder(stream);audioChunks=[];mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=async()=>{const audioBlob=new Blob(audioChunks,{type:'audio/webm'});const reader=new FileReader();reader.onload=async(ev)=>{const base64=ev.target.result;await db.collection('chats').doc(currentChat.chatId).collection('messages').add({senderId:currentUser.uid,audio:base64,timestamp:firebase.firestore.FieldValue.serverTimestamp()});};reader.readAsDataURL(audioBlob);stream.getTracks().forEach(t=>t.stop());};mediaRecorder.start();isRecording=true;btn?.classList.add('recording');btn.innerHTML='🔴 Запись...';}};
 
     window.sendMedia=()=>{document.getElementById('mediaInput').click();};
     window.handleMedia=async(e)=>{const file=e.target.files[0];if(!file||!currentChat)return;const reader=new FileReader();reader.onload=async(ev)=>{const base64=ev.target.result;const isVideo=file.type.startsWith('video');await db.collection('chats').doc(currentChat.chatId).collection('messages').add({senderId:currentUser.uid,[isVideo?'video':'image']:base64,timestamp:firebase.firestore.FieldValue.serverTimestamp()});};reader.readAsDataURL(file);};
-    
+
     window.openSchedule=()=>{document.getElementById('scheduleModal').classList.add('active');};
     window.closeSchedule=()=>{document.getElementById('scheduleModal').classList.remove('active');};
     window.sendScheduled=async()=>{const text=document.getElementById('scheduleText').value.trim();const time=document.getElementById('scheduleTime').value;if(!text||!time||!currentChat)return alert('Заполните все поля');const scheduledTime=new Date(time).getTime();if(scheduledTime<=Date.now())return alert('Время должно быть в будущем');setTimeout(async()=>{await db.collection('chats').doc(currentChat.chatId).collection('messages').add({senderId:currentUser.uid,text:`⏰ ${text}`,timestamp:firebase.firestore.FieldValue.serverTimestamp()});},scheduledTime-Date.now());closeSchedule();alert('Запланировано');};
 
-    window.sendMsg=async(hidden=false)=>{const input=document.getElementById('msgInput');const text=input.value.trim();if(!text||!currentChat||isReadonly())return;const msgData={senderId:currentUser.uid,text,timestamp:firebase.firestore.FieldValue.serverTimestamp()};if(hidden)msgData.hidden=true;let seconds=0;if(msgTimer==='custom')seconds=parseInt(document.getElementById('customSeconds')?.value)||customSeconds;else if(msgTimer!=='off')seconds={'10s':10,'1m':60,'1h':3600,'24h':86400}[msgTimer]||0;if(seconds>0)msgData.expiresAt=Date.now()+seconds*1000;await db.collection('chats').doc(currentChat.chatId).collection('messages').add(msgData);input.value='';db.collection('chats').doc(currentChat.chatId).update({[`typing.${currentUser.uid}`]:false});};
+    window.sendMsg=async(hidden=false)=>{const input=document.getElementById('msgInput');const text=input.value.trim();if(!text||!currentChat)return;const msgData={senderId:currentUser.uid,text,timestamp:firebase.firestore.FieldValue.serverTimestamp()};if(hidden)msgData.hidden=true;await db.collection('chats').doc(currentChat.chatId).collection('messages').add(msgData);input.value='';};
 
     function renderChat(){
-      const u=currentChat.otherUser;const showSaveBtn=!isSaveDisabled();const readonly=isReadonly();
+      const u=currentChat.otherUser;const isSystem=SYSTEM_IDS.includes(currentChat.chatId.split('_').find(id=>id!==currentUser.uid));
+      const readonly=isSystem&&(currentChat.chatId.includes('verification')||currentChat.chatId.includes('saved'));
       document.getElementById('chatPanel').innerHTML=`
-        <div class="chat-header"><button class="back-btn" onclick="closeChat()">←</button><div class="avatar" onclick="showUserInfo('${currentChat.chatId.split('_').find(id=>id!==currentUser.uid)}')">${u.photoURL?`<img src="${u.photoURL}">`:(u.displayName||u.email).charAt(0)}</div><div style="font-weight:700;">${u.displayName||u.email}</div></div>
+        <div class="chat-header"><button class="back-btn" onclick="closeChat()">←</button><div class="avatar" onclick="showUserInfo('${currentChat.chatId.split('_').find(id=>id!==currentUser.uid)}')">${u.photoURL?`<img src="${u.photoURL}">`:(u.displayName||u.email).charAt(0)}</div><div style="font-weight:700;">${u.displayName||u.email}</div>${!isSystem?`<button class="call-btn" onclick="startCall()">📞</button>`:''}</div>
         <div class="messages" id="msgContainer"></div>
         <div class="typing-indicator" id="typingIndicator"></div>
         ${!readonly?`
         <div class="tools-panel" id="toolsPanel">
-          <button class="tool-btn" id="voiceBtn" onclick="toggleVoice()">🎵 Голосовое</button>
-          <button class="tool-btn" onclick="openSchedule()">⏰ Отложенное</button>
-          <button class="tool-btn" onclick="sendMsg(true)">👻 Невидимое</button>
-          <button class="tool-btn" onclick="sendMedia()">📷 Медиа</button>
-          <button class="tool-btn" onclick="switchTimer('10s')">⏳ 10 сек</button>
-          <button class="tool-btn" onclick="switchTimer('1m')">⏳ 1 мин</button>
-          <button class="tool-btn" onclick="switchTimer('1h')">⏳ 1 час</button>
-          <button class="tool-btn" onclick="switchTimer('24h')">⏳ 24 часа</button>
-          <button class="tool-btn" onclick="switchTimer('off')">⏳ Обычное</button>
+          <button class="tool-btn" id="voiceBtn" onclick="toggleVoice()">🎵</button>
+          <button class="tool-btn" onclick="openSchedule()">⏰</button>
+          <button class="tool-btn" onclick="sendMsg(true)">👻</button>
+          <button class="tool-btn" onclick="sendMedia()">📷</button>
         </div>
         <input type="file" id="mediaInput" accept="image/*,video/*" style="display:none" onchange="handleMedia(event)">
         <div class="input-area">
@@ -212,27 +207,24 @@
         </div>`:'<div style="padding:14px;text-align:center;color:var(--text-secondary);">Чат только для чтения</div>'}`;
       document.getElementById('chatPanel').classList.add('active');document.getElementById('mainPanel').style.display='none';
       if(unsubscribe)unsubscribe();if(timerInterval)clearInterval(timerInterval);
-      unsubscribe=db.collection('chats').doc(currentChat.chatId).collection('messages').orderBy('timestamp','asc').onSnapshot(snap=>{const c=document.getElementById('msgContainer');if(!c)return;c.innerHTML='';const now=Date.now();snap.forEach(doc=>{const m=doc.data();if(m.expiresAt&&now>m.expiresAt)return;const isSent=m.senderId===currentUser.uid;const timerText=m.expiresAt?Math.max(0,Math.ceil((m.expiresAt-now)/1000))+'с':'';let content='';if(m.audio)content=`<div class="voice-msg">🎵 <audio controls src="${m.audio}"></audio></div>`;else if(m.image)content=`<img src="${m.image}" style="max-width:200px;border-radius:10px;">`;else if(m.video)content=`<video controls src="${m.video}" style="max-width:200px;border-radius:10px;"></video>`;else content=m.text;c.innerHTML+=`<div class="msg-wrapper ${isSent?'sent':'received'}" data-expires="${m.expiresAt||''}"><div class="msg ${isSent?'sent':'received'}">${content}${timerText?`<div class="msg-timer">⏳ ${timerText}</div>`:''}</div>${showSaveBtn?`<button class="save-btn" onclick="event.stopPropagation();saveMessage('${doc.id}')">💾</button>`:''}</div>`;});c.scrollTop=c.scrollHeight;});
-      db.collection('chats').doc(currentChat.chatId).onSnapshot(doc=>{const data=doc.data()?.typing||{};const typers=Object.keys(data).filter(uid=>uid!==currentUser.uid&&data[uid]);const indicator=document.getElementById('typingIndicator');if(indicator)indicator.textContent=typers.length>0?'печатает...':'';});
-      timerInterval=setInterval(()=>{const wrappers=document.querySelectorAll('.msg-wrapper[data-expires]');const now=Date.now();wrappers.forEach(w=>{const expires=parseInt(w.getAttribute('data-expires'));if(!expires)return;const remaining=Math.max(0,Math.ceil((expires-now)/1000));const timerEl=w.querySelector('.msg-timer');if(timerEl)timerEl.textContent='⏳ '+remaining+'с';if(remaining===0){w.style.opacity='0';setTimeout(()=>w.remove(),500);}});},1000);
+      unsubscribe=db.collection('chats').doc(currentChat.chatId).collection('messages').orderBy('timestamp','asc').onSnapshot(snap=>{const c=document.getElementById('msgContainer');if(!c)return;c.innerHTML='';snap.forEach(doc=>{const m=doc.data();const isSent=m.senderId===currentUser.uid;let content='';if(m.audio)content=`<div class="voice-msg">🎵 <audio controls src="${m.audio}"></audio></div>`;else if(m.image)content=`<img src="${m.image}" style="max-width:180px;border-radius:8px;">`;else if(m.video)content=`<video controls src="${m.video}" style="max-width:180px;border-radius:8px;"></video>`;else content=m.text;c.innerHTML+=`<div class="msg-wrapper ${isSent?'sent':'received'}"><div class="msg ${isSent?'sent':'received'}">${content}</div><button class="save-btn" onclick="event.stopPropagation();saveMessage('${doc.id}')">💾</button></div>`;});c.scrollTop=c.scrollHeight;});
     }
-    
-    window.switchTimer=(val)=>{msgTimer=val;};
-    window.handleTyping=()=>{if(!currentChat||isReadonly())return;db.collection('chats').doc(currentChat.chatId).update({[`typing.${currentUser.uid}`]:true});clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>{db.collection('chats').doc(currentChat.chatId).update({[`typing.${currentUser.uid}`]:false});},2000);};
-    window.closeChat=()=>{document.getElementById('chatPanel').classList.remove('active');document.getElementById('mainPanel').style.display='block';if(unsubscribe){unsubscribe();unsubscribe=null;}if(timerInterval){clearInterval(timerInterval);timerInterval=null;}clearTimeout(typingTimeout);if(mediaRecorder&&isRecording){mediaRecorder.stop();isRecording=false;}refreshChats();};
+
+    window.handleTyping=()=>{if(!currentChat)return;db.collection('chats').doc(currentChat.chatId).update({[`typing.${currentUser.uid}`]:true});clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>{db.collection('chats').doc(currentChat.chatId).update({[`typing.${currentUser.uid}`]:false});},2000);};
+    window.closeChat=()=>{document.getElementById('chatPanel').classList.remove('active');document.getElementById('mainPanel').style.display='block';if(unsubscribe){unsubscribe();unsubscribe=null;}if(timerInterval){clearInterval(timerInterval);timerInterval=null;}clearTimeout(typingTimeout);};
     window.saveMessage=async(msgId)=>{try{const msgDoc=await db.collection('chats').doc(currentChat.chatId).collection('messages').doc(msgId).get();if(msgDoc.exists){const savedChatId=[currentUser.uid,'saved-bot'].sort().join('_');await db.collection('chats').doc(savedChatId).set({participants:[currentUser.uid,'saved-bot'],updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});const data=msgDoc.data();let text='📌 ';if(data.audio)text+='[Голосовое]';else if(data.image)text+='[Фото]';else if(data.video)text+='[Видео]';else text+=data.text;await db.collection('chats').doc(savedChatId).collection('messages').add({senderId:currentUser.uid,text,timestamp:firebase.firestore.FieldValue.serverTimestamp()});alert('Сохранено');}}catch(e){alert('Ошибка: '+e.message);}};
-    
-    window.refreshChats=function(){db.collection('chats').where('participants','array-contains',currentUser?.uid||'').orderBy('updatedAt','desc').onSnapshot(async snap=>{const items=[];for(const doc of snap.docs){try{const data=doc.data();const otherId=data.participants.find(id=>id!==currentUser?.uid);if(!otherId||SYSTEM_IDS.includes(otherId))continue;const userDoc=await db.collection('users').doc(otherId).get();if(!userDoc.exists)continue;const u=userDoc.data();let lastMsg='';try{const msgs=await db.collection('chats').doc(doc.id).collection('messages').orderBy('timestamp','desc').limit(1).get();msgs.forEach(m=>{const d=m.data();lastMsg=d.audio?'[Голосовое]':d.image?'[Фото]':d.video?'[Видео]':d.text;});}catch(e){}items.push({chatId:doc.id,user:u,lastMsg});}catch(e){}}
+
+    function listenChats(){db.collection('chats').where('participants','array-contains',currentUser.uid).orderBy('updatedAt','desc').onSnapshot(async snap=>{const items=[];for(const doc of snap.docs){try{const data=doc.data();const otherId=data.participants.find(id=>id!==currentUser.uid);if(!otherId||SYSTEM_IDS.includes(otherId))continue;const userDoc=await db.collection('users').doc(otherId).get();if(!userDoc.exists)continue;const u=userDoc.data();let lastMsg='';try{const msgs=await db.collection('chats').doc(doc.id).collection('messages').orderBy('timestamp','desc').limit(1).get();msgs.forEach(m=>{const d=m.data();lastMsg=d.audio?'[Голосовое]':d.image?'[Фото]':d.video?'[Видео]':d.text;});}catch(e){}items.push({chatId:doc.id,user:u,lastMsg});}catch(e){}}
       items.sort((a,b)=>(a.user.displayName||'').localeCompare(b.user.displayName||''));
       document.getElementById('chatList').innerHTML='';if(items.length===0){document.getElementById('chatList').innerHTML='<div style="padding:60px;text-align:center;color:var(--text-secondary);">Нет чатов</div>';return;}
-      items.forEach(item=>{const div=document.createElement('div');div.className='list-item';div.innerHTML=`<div class="avatar" onclick="showUserInfo('${item.chatId.split('_').find(id=>id!==currentUser?.uid)}')">${item.user.photoURL?`<img src="${item.user.photoURL}">`:(item.user.displayName||item.user.email).charAt(0)}</div><div class="item-info"><div class="item-title">${item.user.displayName||item.user.email}</div><div class="item-subtitle">${item.lastMsg||'Нет сообщений'}</div></div>`;div.onclick=()=>{currentChat={chatId:item.chatId,otherUser:item.user};renderChat();};document.getElementById('chatList').appendChild(div);});});};
-    
+      items.forEach(item=>{const div=document.createElement('div');div.className='list-item';div.innerHTML=`<div class="avatar" onclick="showUserInfo('${item.chatId.split('_').find(id=>id!==currentUser.uid)}')">${item.user.photoURL?`<img src="${item.user.photoURL}">`:(item.user.displayName||item.user.email).charAt(0)}</div><div class="item-info"><div class="item-title">${item.user.displayName||item.user.email}</div><div class="item-subtitle">${item.lastMsg||'Нет сообщений'}</div></div>`;div.onclick=()=>{currentChat={chatId:item.chatId,otherUser:item.user};renderChat();};document.getElementById('chatList').appendChild(div);});});}
+
     window.switchTab=function(tab){
       document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
       document.getElementById('chatList').style.display='none';
       document.getElementById('contactList').style.display='none';
       document.getElementById('systemList').style.display='none';
-      if(tab==='chats'){document.querySelector('.tab:nth-child(1)').classList.add('active');document.getElementById('chatList').style.display='block';refreshChats();}
+      if(tab==='chats'){document.querySelector('.tab:nth-child(1)').classList.add('active');document.getElementById('chatList').style.display='block';}
       else if(tab==='contacts'){document.querySelector('.tab:nth-child(2)').classList.add('active');document.getElementById('contactList').style.display='block';loadContacts();}
       else{document.querySelector('.tab:nth-child(3)').classList.add('active');document.getElementById('systemList').style.display='block';loadSystemList();}
     };
@@ -248,7 +240,7 @@
     window.verifyCode=()=>{if(document.getElementById('verificationCode').value.trim()===verificationCode){document.getElementById('newPhoneSection').style.display='block';document.getElementById('verificationCode').disabled=true;}else alert('Неверный код');};
     window.confirmNewPhone=async()=>{const phone=document.getElementById('newPhone').value.trim();if(!phone)return;await db.collection('users').doc(currentUser.uid).update({phone});currentUserProfile.phone=phone;document.getElementById('profilePhone').textContent=phone;document.getElementById('changePhoneModal').classList.remove('active');};
 
-    window.openSettings=()=>{updateThemeUI();document.getElementById('settingsModal').classList.add('active');};
+    window.openSettings=()=>document.getElementById('settingsModal').classList.add('active');
     window.closeSettings=()=>document.getElementById('settingsModal').classList.remove('active');
   </script>
 </body>
