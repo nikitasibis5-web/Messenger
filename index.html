@@ -96,6 +96,7 @@
 </head>
 <body>
 
+  <!-- Экран авторизации -->
   <div id="authScreen" class="auth-screen active">
     <h2 id="authTitle">Вход</h2>
     <input type="email" id="email" placeholder="Email" autocomplete="email">
@@ -109,6 +110,7 @@
     <div class="toggle-text"><span onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</span></div>
   </div>
 
+  <!-- Основное приложение -->
   <div id="app" class="app">
     <div id="mainPanel">
       <div class="header">
@@ -132,14 +134,120 @@
     <div id="chatPanel" class="chat-panel"></div>
   </div>
 
-  <div id="addContactModal" class="modal">...</div> <!-- сохранено как было, сокращено для brevity -->
-  <div id="createGroupModal" class="modal">...</div>
-  <div id="editGroupModal" class="modal">...</div>
-  <div id="scheduleModal" class="modal">...</div>
-  <div id="settingsModal" class="modal">...</div>
-  <div id="profileModal" class="modal">...</div>
-  <div id="userInfoModal" class="modal">...</div>
-  <div id="changePhoneModal" class="modal">...</div>
+  <!-- Модальное окно: Добавить контакт -->
+  <div id="addContactModal" class="modal">
+    <div class="modal-content">
+      <h3>Добавить контакт</h3>
+      <div style="display:flex;gap:4px;margin-bottom:8px;">
+        <select id="addCountryCode" style="padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);">
+          <option value="+7">+7</option><option value="+380">+380</option><option value="+375">+375</option>
+          <option value="+1">+1</option><option value="+44">+44</option><option value="+49">+49</option><option value="+33">+33</option>
+        </select>
+        <input type="tel" id="addPhone" placeholder="Номер" style="flex:1;">
+      </div>
+      <button onclick="addContactByPhone()">Найти и добавить</button>
+      <button class="btn-secondary" onclick="closeAddContact()" style="margin-top:6px;">Отмена</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно: Создать группу -->
+  <div id="createGroupModal" class="modal">
+    <div class="modal-content">
+      <h3>Создать группу</h3>
+      <input type="text" id="groupName" placeholder="Название группы">
+      <div id="groupContacts" style="max-height:180px;overflow-y:auto;"></div>
+      <button onclick="createGroup()">Создать</button>
+      <button class="btn-secondary" onclick="closeCreateGroup()" style="margin-top:6px;">Отмена</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно: Редактировать группу -->
+  <div id="editGroupModal" class="modal">
+    <div class="modal-content">
+      <h3>Редактировать группу</h3>
+      <div style="width:70px;height:70px;border-radius:50%;margin:0 auto 12px;background:var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;" onclick="document.getElementById('groupAvatarInput').click()">
+        <img id="groupAvatarPreview" src="" style="display:none;width:100%;height:100%;object-fit:cover;">
+        <span id="groupAvatarPlaceholder" style="font-size:1.8rem;">📷</span>
+      </div>
+      <input type="file" id="groupAvatarInput" accept="image/*" style="display:none;" onchange="uploadGroupAvatar(event)">
+      <input type="text" id="editGroupName" placeholder="Название группы">
+      <textarea id="editGroupDesc" rows="3" placeholder="Описание группы"></textarea>
+      <button onclick="saveGroupInfo()">Сохранить</button>
+      <button class="btn-secondary" onclick="closeEditGroup()" style="margin-top:6px;">Отмена</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно: Отложенное сообщение -->
+  <div id="scheduleModal" class="modal">
+    <div class="modal-content">
+      <h3>Отложенное сообщение</h3>
+      <input type="text" id="scheduleText" placeholder="Текст сообщения">
+      <input type="datetime-local" id="scheduleTime">
+      <button onclick="sendScheduled()">Запланировать</button>
+      <button class="btn-secondary" onclick="closeSchedule()" style="margin-top:6px;">Отмена</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно: Настройки -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <h3>Настройки</h3>
+      <p style="color:var(--text-secondary);margin-bottom:8px;">Тема оформления</p>
+      <div class="theme-options">
+        <div class="theme-opt active" onclick="setTheme('default')">☀️</div>
+        <div class="theme-opt" onclick="setTheme('dark')">🌙</div>
+        <div class="theme-opt" onclick="setTheme('cyberforce')">🌿</div>
+        <div class="theme-opt" onclick="setTheme('cherry')">🍒</div>
+        <div class="theme-opt" onclick="setTheme('ocean')">🌊</div>
+        <div class="theme-opt" onclick="setTheme('caramel')">☕</div>
+      </div>
+      <button class="btn-secondary" onclick="closeSettings()" style="margin-top:16px;">Закрыть</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно: Профиль -->
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <h3>Профиль</h3>
+      <div style="width:70px;height:70px;border-radius:50%;margin:0 auto 12px;background:var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;" onclick="document.getElementById('avatarInput').click()">
+        <img id="profileAvatar" src="" style="display:none;width:100%;height:100%;object-fit:cover;">
+        <span id="avatarPlaceholder" style="font-size:1.8rem;">📷</span>
+      </div>
+      <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)">
+      <input type="text" id="profileName" placeholder="Имя">
+      <textarea id="profileBio" rows="2" placeholder="О себе"></textarea>
+      <div style="display:flex;align-items:center;gap:6px;margin:6px 0;">
+        <span id="profilePhone" style="flex:1;padding:10px;background:var(--bg);border-radius:10px;font-size:0.9rem;"></span>
+        <button class="btn-secondary" onclick="openChangePhone()" style="width:auto;padding:10px 14px;">Сменить</button>
+      </div>
+      <button onclick="saveProfile()">Сохранить</button>
+      <button class="btn-secondary" onclick="closeProfile()" style="margin-top:6px;">Отмена</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно: Информация о пользователе -->
+  <div id="userInfoModal" class="modal">
+    <div class="modal-content" id="userInfoContent"></div>
+  </div>
+
+  <!-- Модальное окно: Смена номера -->
+  <div id="changePhoneModal" class="modal">
+    <div class="modal-content">
+      <h3>Смена номера</h3>
+      <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:8px;">Код подтверждения отправлен в чат Verification</p>
+      <input type="text" id="verificationCode" placeholder="Введите код из чата">
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button onclick="verifyCode()" style="flex:1;">Проверить</button>
+        <button id="newCodeBtn" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:0.8rem;" onclick="requestNewCode()">Новый код</button>
+      </div>
+      <div id="timerText" style="font-size:0.8rem;color:var(--text-secondary);margin-top:4px;"></div>
+      <div id="newPhoneSection" style="display:none;margin-top:12px;">
+        <input type="tel" id="newPhone" placeholder="Новый номер">
+        <button onclick="confirmNewPhone()" style="margin-top:8px;">Подтвердить</button>
+      </div>
+      <button class="btn-secondary" onclick="closeChangePhone()" style="margin-top:8px;">Отмена</button>
+    </div>
+  </div>
 
   <script>
     // ============ FIREBASE INIT ============
@@ -185,22 +293,514 @@
     const SYSTEM_IDS = Object.keys(SYSTEM_BOTS);
     const THEMES = ['default', 'dark', 'cyberforce', 'cherry', 'ocean', 'caramel'];
 
-    // ... (весь остальной код без изменений, кроме startCall и обработки ошибок) ...
+    // ============ THEMES ============
+    function applyTheme(t) { document.body.classList.remove(...THEMES); if (t!=='default') document.body.classList.add(t); localStorage.setItem('theme',t); updateThemeUI(); }
+    function updateThemeUI() { const current=localStorage.getItem('theme')||'default'; document.querySelectorAll('.theme-opt').forEach(o=>o.classList.remove('active')); const idx=THEMES.indexOf(current); if(idx>=0&&document.querySelectorAll('.theme-opt')[idx]) document.querySelectorAll('.theme-opt')[idx].classList.add('active'); }
+    window.setTheme=t=>applyTheme(t);
+    applyTheme(localStorage.getItem('theme')||'default');
 
-    // ==================== WEBRTC CALLS (исправлено) ====================
+    // ============ AUTH ============
+    window.toggleMode = () => {
+      isLogin = !isLogin;
+      document.getElementById('authTitle').textContent = isLogin?'Вход':'Регистрация';
+      document.getElementById('authBtn').textContent = isLogin?'Войти':'Зарегистрироваться';
+      document.getElementById('extraFields').style.display = isLogin?'none':'block';
+      document.getElementById('authError').textContent = '';
+    };
+    window.handleAuth = async () => {
+      const email = document.getElementById('email').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      const name = document.getElementById('displayName').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      if (!email || !pass) { document.getElementById('authError').textContent = 'Заполните email и пароль'; return; }
+      if (!isLogin && !name) { document.getElementById('authError').textContent = 'Введите имя'; return; }
+      if (!isLogin && (!phone || !/^[\d()+-\s]*$/.test(phone))) { document.getElementById('authError').textContent = 'Телефон должен содержать только цифры'; return; }
+      try {
+        if (isLogin) await auth.signInWithEmailAndPassword(email, pass);
+        else {
+          const cred = await auth.createUserWithEmailAndPassword(email, pass);
+          await db.collection('users').doc(cred.user.uid).set({ email, displayName: name, phone, bio:'', photoURL:'' });
+        }
+      } catch (err) { document.getElementById('authError').textContent = err.message; }
+    };
+    window.logout = () => auth.signOut();
+
+    // ============ SYSTEM CHATS ============
+    async function ensureSystemChats(uid) {
+      for (const [botId, profile] of Object.entries(SYSTEM_BOTS)) {
+        await db.collection('users').doc(botId).set(profile, { merge: true });
+        const chatId = [uid, botId].sort().join('_');
+        const ref = db.collection('chats').doc(chatId);
+        if (!(await ref.get()).exists) {
+          await ref.set({ participants: [uid, botId], updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+          if (botId === 'favorites-bot') await ref.collection('messages').add({ senderId: botId, text: '📌 Ваш личный чат для заметок', timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+          if (botId === 'saved-bot') await ref.collection('messages').add({ senderId: botId, text: '💾 Здесь будут ваши сохранённые сообщения', timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+        }
+      }
+    }
+
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        currentUser = user;
+        const doc = await db.collection('users').doc(user.uid).get();
+        currentUserProfile = doc.exists ? doc.data() : { displayName: user.email.split('@')[0], bio:'', photoURL:'' };
+        await ensureSystemChats(user.uid);
+        document.getElementById('authScreen').classList.remove('active');
+        document.getElementById('app').classList.add('active');
+        loadSystemList();
+        listenChats();
+        listenForIncomingCalls();
+      } else {
+        currentUser = null;
+        document.getElementById('authScreen').classList.add('active');
+        document.getElementById('app').classList.remove('active');
+        document.getElementById('chatPanel').innerHTML = '';
+        document.getElementById('chatPanel').classList.remove('active');
+        if (chatListUnsubscribe) { chatListUnsubscribe(); chatListUnsubscribe = null; }
+        endCall();
+      }
+    });
+
+    async function loadSystemList() {
+      const list = document.getElementById('systemList');
+      list.innerHTML = '';
+      for (const [botId, profile] of Object.entries(SYSTEM_BOTS)) {
+        const botDoc = await db.collection('users').doc(botId).get();
+        const u = botDoc.exists ? botDoc.data() : profile;
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.innerHTML = `<div class="avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.displayName||'S').charAt(0)}</div><div class="item-info"><div class="item-title">${u.displayName||botId}</div></div>`;
+        div.onclick = () => openChat(botId, u);
+        list.appendChild(div);
+      }
+    }
+
+    // ============ CONTACTS ============
+    window.openAddContact = () => document.getElementById('addContactModal').classList.add('active');
+    window.closeAddContact = () => document.getElementById('addContactModal').classList.remove('active');
+    window.addContactByPhone = async () => {
+      const code = document.getElementById('addCountryCode').value;
+      const phone = document.getElementById('addPhone').value.trim();
+      if (!phone) return alert('Введите номер');
+      const full = code + phone;
+      try {
+        const snap = await db.collection('users').where('phone','==',full).get();
+        if (snap.empty) { alert('Контакт не найден'); return; }
+        for (const doc of snap.docs) {
+          if (doc.id !== currentUser.uid) {
+            const chatId = [currentUser.uid, doc.id].sort().join('_');
+            await db.collection('chats').doc(chatId).set({ participants: [currentUser.uid, doc.id], permanent: true, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+            closeAddContact();
+            await loadAllChats();
+            openChat(doc.id, doc.data());
+            break;
+          }
+        }
+      } catch (e) { alert('Ошибка'); }
+    };
+
+    // ============ GROUPS ============
+    window.openCreateGroup = async () => {
+      const container = document.getElementById('groupContacts');
+      container.innerHTML = 'Загрузка...';
+      const snap = await db.collection('users').get();
+      container.innerHTML = '';
+      snap.forEach(doc => {
+        if (doc.id === currentUser.uid || SYSTEM_IDS.includes(doc.id)) return;
+        const u = doc.data();
+        const div = document.createElement('div'); div.className = 'contact-checkbox';
+        div.innerHTML = `<input type="checkbox" value="${doc.id}" id="gc_${doc.id}"><label for="gc_${doc.id}">${u.displayName||u.email}</label>`;
+        container.appendChild(div);
+      });
+      document.getElementById('createGroupModal').classList.add('active');
+    };
+    window.closeCreateGroup = () => document.getElementById('createGroupModal').classList.remove('active');
+    window.createGroup = async () => {
+      const name = document.getElementById('groupName').value.trim() || 'Группа';
+      const members = [currentUser.uid];
+      document.querySelectorAll('#groupContacts input:checked').forEach(cb => members.push(cb.value));
+      if (members.length < 2) return alert('Выберите участника');
+      const chatId = 'group_' + Date.now();
+      await db.collection('chats').doc(chatId).set({ participants: members, groupName: name, groupDesc:'', groupAvatar:'', isGroup:true, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      closeCreateGroup();
+      currentChat = { chatId, otherUser: { displayName: name, isGroup: true, groupDesc:'', groupAvatar:'' } };
+      switchTab('chats'); renderChat();
+    };
+
+    window.openEditGroup = async (chatId) => {
+      editingGroupId = chatId;
+      const doc = await db.collection('chats').doc(chatId).get();
+      if (doc.exists) {
+        const data = doc.data();
+        document.getElementById('editGroupName').value = data.groupName || '';
+        document.getElementById('editGroupDesc').value = data.groupDesc || '';
+        const preview = document.getElementById('groupAvatarPreview'), placeholder = document.getElementById('groupAvatarPlaceholder');
+        if (data.groupAvatar) { preview.src = data.groupAvatar; preview.style.display='block'; placeholder.style.display='none'; }
+        else { preview.style.display='none'; placeholder.style.display='flex'; }
+        document.getElementById('editGroupModal').classList.add('active');
+      }
+    };
+    window.closeEditGroup = () => { document.getElementById('editGroupModal').classList.remove('active'); editingGroupId = null; };
+    window.uploadGroupAvatar = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 2*1024*1024) { alert('Макс. 2MB'); return; }
+      const reader = new FileReader();
+      reader.onload = (ev) => { document.getElementById('groupAvatarPreview').src = ev.target.result; document.getElementById('groupAvatarPreview').style.display='block'; document.getElementById('groupAvatarPlaceholder').style.display='none'; };
+      reader.readAsDataURL(file);
+    };
+    window.saveGroupInfo = async () => {
+      if (!editingGroupId) return;
+      const name = document.getElementById('editGroupName').value.trim();
+      const desc = document.getElementById('editGroupDesc').value.trim();
+      const avatar = document.getElementById('groupAvatarPreview').src;
+      if (!name) return alert('Введите название');
+      const updateData = { groupName: name, groupDesc: desc, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+      if (avatar && avatar !== window.location.href) updateData.groupAvatar = avatar;
+      await db.collection('chats').doc(editingGroupId).update(updateData);
+      if (currentChat && currentChat.chatId === editingGroupId) { currentChat.otherUser.displayName = name; currentChat.otherUser.groupDesc = desc; currentChat.otherUser.groupAvatar = avatar; renderChat(); }
+      closeEditGroup(); await loadAllChats(); alert('✅ Группа обновлена');
+    };
+
+    async function loadContacts(query) {
+      const list = document.getElementById('contactList');
+      list.innerHTML = `<div style="padding:8px 12px;display:flex;gap:6px;"><select id="countryCode" style="padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);"><option value="+7">+7</option><option value="+380">+380</option><option value="+375">+375</option><option value="+1">+1</option><option value="+44">+44</option><option value="+49">+49</option><option value="+33">+33</option></select><input type="tel" id="searchPhone" placeholder="Номер" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);"><button onclick="searchByPhone()" style="padding:10px 14px;background:var(--primary);color:#fff;border:none;border-radius:12px;cursor:pointer;">Найти</button></div><div style="padding:8px 12px;"><button onclick="openAddContact()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:12px;cursor:pointer;font-weight:600;">➕ Добавить контакт</button></div>`;
+      if (query) {
+        const snap = await db.collection('users').where('phone','==',query).get();
+        if (snap.empty) { list.innerHTML += '<div class="empty-state">Контакт не найден</div>'; return; }
+        snap.forEach(doc => {
+          if (doc.id === currentUser.uid) return;
+          const u = doc.data();
+          const div = document.createElement('div'); div.className = 'list-item';
+          div.innerHTML = `<div class="avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.displayName||u.email).charAt(0)}</div><div class="item-info"><div class="item-title">${u.displayName||u.email}</div></div>`;
+          div.onclick = () => openChat(doc.id, u);
+          list.appendChild(div);
+        });
+      }
+    }
+    window.searchByPhone = () => {
+      const code = document.getElementById('countryCode')?.value || '+7';
+      const phone = document.getElementById('searchPhone')?.value.trim();
+      if (phone) loadContacts(code + phone);
+    };
+
+    window.showUserInfo = async (uid) => {
+      const doc = await db.collection('users').doc(uid).get();
+      if (doc.exists) {
+        const u = doc.data();
+        document.getElementById('userInfoContent').innerHTML = `<h3>${u.displayName||'Пользователь'}</h3><p><strong>О себе:</strong> ${u.bio||'Не указано'}</p><p><strong>Телефон:</strong> ${u.phone||'Не указан'}</p><button class="btn-secondary" onclick="document.getElementById('userInfoModal').classList.remove('active')">Закрыть</button>`;
+        document.getElementById('userInfoModal').classList.add('active');
+      }
+    };
+
+    async function openChat(otherId, otherUser) {
+      const chatId = [currentUser.uid, otherId].sort().join('_');
+      await db.collection('chats').doc(chatId).set({ participants: [currentUser.uid, otherId], permanent: true, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      currentChat = { chatId, otherUser: { ...otherUser, id: otherId } };
+      renderChat();
+    }
+
+    window.ensureChatPermanent = async (otherId) => {
+      if (!currentUser || !otherId) return;
+      const chatId = [currentUser.uid, otherId].sort().join('_');
+      await db.collection('chats').doc(chatId).set({ participants: [currentUser.uid, otherId], permanent: true, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      alert('✅ Чат закреплён');
+    };
+
+    // ============ MESSAGE TOOLS ============
+    window.toggleTools = () => { const p = document.getElementById('toolsPanel'); if (p) p.classList.toggle('active'); };
+    window.toggleVoice = async () => {
+      const btn = document.getElementById('voiceBtn');
+      if (isRecording) {
+        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+        isRecording = false;
+        if (btn) { btn.classList.remove('recording'); btn.innerHTML = '🎵'; }
+      } else {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          mediaRecorder.ondataavailable = e => { if (e.data.size>0) audioChunks.push(e.data); };
+          mediaRecorder.onstop = async () => {
+            const blob = new Blob(audioChunks, { type:'audio/webm' });
+            if (blob.size > 0) {
+              const reader = new FileReader();
+              reader.onload = async (ev) => { if (currentChat) await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId:currentUser.uid, audio:ev.target.result, timestamp:firebase.firestore.FieldValue.serverTimestamp() }); };
+              reader.readAsDataURL(blob);
+            }
+            stream.getTracks().forEach(t=>t.stop());
+          };
+          mediaRecorder.start();
+          isRecording = true;
+          if (btn) { btn.classList.add('recording'); btn.innerHTML = '🔴'; }
+        } catch (e) { alert('Нет доступа к микрофону'); }
+      }
+    };
+    window.sendMedia = () => document.getElementById('mediaInput').click();
+    window.handleMedia = async (e) => {
+      const file = e.target.files[0];
+      if (!file || !currentChat) return;
+      if (file.size > 5*1024*1024) { alert('Макс. 5MB'); return; }
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const isVideo = file.type.startsWith('video');
+        await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId:currentUser.uid, [isVideo?'video':'image']:ev.target.result, timestamp:firebase.firestore.FieldValue.serverTimestamp() });
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    };
+    window.openSchedule = () => document.getElementById('scheduleModal').classList.add('active');
+    window.closeSchedule = () => document.getElementById('scheduleModal').classList.remove('active');
+    window.sendScheduled = async () => {
+      const text = document.getElementById('scheduleText').value.trim();
+      const time = document.getElementById('scheduleTime').value;
+      if (!text || !time || !currentChat) return alert('Заполните все поля');
+      const st = new Date(time).getTime();
+      if (st <= Date.now()) return alert('Время должно быть в будущем');
+      setTimeout(async () => { await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId:currentUser.uid, text:`⏰ ${text}`, timestamp:firebase.firestore.FieldValue.serverTimestamp() }); }, st - Date.now());
+      closeSchedule(); alert('Запланировано');
+    };
+    window.sendMsg = async (hidden=false) => {
+      const input = document.getElementById('msgInput');
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text || !currentChat) return;
+      const msgData = { senderId:currentUser.uid, text, timestamp:firebase.firestore.FieldValue.serverTimestamp() };
+      if (hidden) msgData.hidden = true;
+      await db.collection('chats').doc(currentChat.chatId).collection('messages').add(msgData);
+      input.value = '';
+    };
+    window.handleTyping = () => {
+      if (!currentChat) return;
+      db.collection('chats').doc(currentChat.chatId).update({ [`typing.${currentUser.uid}`]: true });
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => { db.collection('chats').doc(currentChat.chatId).update({ [`typing.${currentUser.uid}`]: false }); }, 2000);
+    };
+
+    // ============ RENDER CHAT ============
+    function renderChat() {
+      if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+      if (chatTypingUnsubscribe) { chatTypingUnsubscribe(); chatTypingUnsubscribe = null; }
+      clearTimeout(typingTimeout);
+      if (mediaRecorder && isRecording) { mediaRecorder.stop(); isRecording = false; }
+      const u = currentChat.otherUser;
+      const otherId = currentChat.chatId.split('_').find(id=>id!==currentUser.uid);
+      const isSystem = SYSTEM_IDS.includes(otherId) || (u&&u.isGroup);
+      const isGroup = u&&u.isGroup;
+      let readonly = false;
+      if (isSystem && !isGroup) readonly = (otherId==='verification-bot' || otherId==='saved-bot');
+      const canAdd = !isSystem && otherId && otherId!==currentUser.uid;
+      document.getElementById('chatPanel').innerHTML = `
+        <div class="chat-header">
+          <button class="back-btn" onclick="closeChat()">←</button>
+          <div class="avatar" ${isGroup?`onclick="openEditGroup('${currentChat.chatId}')" style="cursor:pointer;"`:''}>${u.groupAvatar?`<img src="${u.groupAvatar}">`:(u.photoURL?`<img src="${u.photoURL}">`:((u.displayName||'C').charAt(0)))}</div>
+          <div style="font-weight:700;flex:1;${isGroup?'cursor:pointer;':''}" ${isGroup?`onclick="openEditGroup('${currentChat.chatId}')"`:''}>${u.displayName||'Чат'}${isGroup&&u.groupDesc?`<div style="font-size:0.7rem;font-weight:400;color:var(--text-secondary);">${u.groupDesc}</div>`:''}</div>
+          ${canAdd?`<button class="icon-btn" onclick="ensureChatPermanent('${otherId}')" title="Добавить в контакты" style="margin-right:4px;">📌</button>`:''}
+          ${isGroup?`<button class="icon-btn" onclick="openEditGroup('${currentChat.chatId}')" title="Настройки группы" style="margin-right:4px;">⚙️</button>`:''}
+          ${!isSystem?'<button class="call-btn" onclick="window.startCall()">📞</button>':''}
+        </div>
+        <div class="messages" id="msgContainer"></div>
+        <div class="typing-indicator" id="typingIndicator"></div>
+        ${!readonly?`
+          <div class="tools-panel" id="toolsPanel"><button class="tool-btn" id="voiceBtn" onclick="toggleVoice()">🎵</button><button class="tool-btn" onclick="openSchedule()">⏰</button><button class="tool-btn" onclick="sendMsg(true)">👻</button><button class="tool-btn" onclick="sendMedia()">📷</button></div>
+          <input type="file" id="mediaInput" accept="image/*,video/*" style="display:none" onchange="handleMedia(event)">
+          <div class="input-area"><button class="attach-btn" onclick="toggleTools()">+</button><input id="msgInput" placeholder="Сообщение..." oninput="handleTyping()" onkeypress="if(event.key==='Enter')sendMsg(false)"><button onclick="sendMsg(false)">➤</button></div>
+        `:'<div style="padding:14px;text-align:center;color:var(--text-secondary);">Чат только для чтения</div>'}
+      `;
+      document.getElementById('chatPanel').classList.add('active');
+      document.getElementById('mainPanel').style.display = 'none';
+      chatUnsubscribe = db.collection('chats').doc(currentChat.chatId).collection('messages').orderBy('timestamp','asc').onSnapshot(snap=>{
+        const c = document.getElementById('msgContainer');
+        if (!c) return;
+        c.innerHTML = '';
+        snap.forEach(doc=>{
+          const m = doc.data();
+          const isSent = m.senderId===currentUser.uid;
+          let content = '';
+          if (m.audio) content = `<div>🎵 <audio controls src="${m.audio}"></audio></div>`;
+          else if (m.image) content = `<img src="${m.image}" style="max-width:200px;max-height:200px;border-radius:10px;">`;
+          else if (m.video) content = `<video controls src="${m.video}" style="max-width:200px;max-height:200px;border-radius:10px;"></video>`;
+          else content = m.text||'';
+          c.innerHTML += `<div class="msg-wrapper ${isSent?'sent':'received'}"><div class="msg ${isSent?'sent':'received'}">${content}</div><button class="save-btn" onclick="event.stopPropagation();saveMessage('${doc.id}')">💾</button></div>`;
+        });
+        c.scrollTop = c.scrollHeight;
+      });
+      chatTypingUnsubscribe = db.collection('chats').doc(currentChat.chatId).onSnapshot(doc=>{
+        const data = doc.data()?.typing||{};
+        const typers = Object.keys(data).filter(uid=>uid!==currentUser.uid&&data[uid]);
+        const indicator = document.getElementById('typingIndicator');
+        if (indicator) indicator.textContent = typers.length>0?'печатает...':'';
+      });
+    }
+    window.closeChat = () => {
+      document.getElementById('chatPanel').classList.remove('active');
+      document.getElementById('mainPanel').style.display = 'block';
+      if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+      if (chatTypingUnsubscribe) { chatTypingUnsubscribe(); chatTypingUnsubscribe = null; }
+      clearTimeout(typingTimeout);
+      if (mediaRecorder && isRecording) { mediaRecorder.stop(); isRecording = false; }
+      currentChat = null;
+      switchTab('chats');
+    };
+    window.saveMessage = async (msgId) => {
+      if (!currentChat) return;
+      const msgDoc = await db.collection('chats').doc(currentChat.chatId).collection('messages').doc(msgId).get();
+      if (msgDoc.exists) {
+        const sc = [currentUser.uid,'saved-bot'].sort().join('_');
+        await db.collection('chats').doc(sc).set({ participants:[currentUser.uid,'saved-bot'], updatedAt:firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
+        const d = msgDoc.data();
+        let t = '📌 ';
+        if (d.audio) t += '[Голосовое]'; else if (d.image) t += '[Фото]'; else if (d.video) t += '[Видео]'; else t += d.text||'';
+        await db.collection('chats').doc(sc).collection('messages').add({ senderId:currentUser.uid, text:t, timestamp:firebase.firestore.FieldValue.serverTimestamp() });
+        alert('Сохранено');
+      }
+    };
+
+    // ============ CHAT LIST ============
+    async function loadAllChats() {
+      const snap = await db.collection('chats').where('participants','array-contains',currentUser.uid).get();
+      await renderChatList(snap);
+    }
+    async function renderChatList(snap) {
+      const items = [];
+      for (const doc of snap.docs) {
+        const data = doc.data();
+        if (data.isGroup) {
+          let lastMsg = '';
+          try { const msgs = await db.collection('chats').doc(doc.id).collection('messages').orderBy('timestamp','desc').limit(1).get(); if (!msgs.empty) { const d = msgs.docs[0].data(); lastMsg = d.audio?'[Голосовое]':d.image?'[Фото]':d.video?'[Видео]':(d.text||''); } } catch(e){}
+          items.push({ chatId:doc.id, user:{ displayName:data.groupName||'Группа', isGroup:true, groupDesc:data.groupDesc||'', groupAvatar:data.groupAvatar||'' }, lastMsg });
+          continue;
+        }
+        const otherId = data.participants.find(id=>id!==currentUser.uid);
+        if (!otherId || SYSTEM_IDS.includes(otherId)) continue;
+        let userData = { displayName:'Контакт', email:'', phone:'' };
+        try { const userDoc = await db.collection('users').doc(otherId).get(); if (userDoc.exists) userData = userDoc.data(); else userData.displayName = 'Пользователь '+otherId.substring(0,8); } catch(e){}
+        let lastMsg = '';
+        try { const msgs = await db.collection('chats').doc(doc.id).collection('messages').orderBy('timestamp','desc').limit(1).get(); if (!msgs.empty) { const d = msgs.docs[0].data(); lastMsg = d.audio?'[Голосовое]':d.image?'[Фото]':d.video?'[Видео]':(d.text||''); } } catch(e){}
+        items.push({ chatId:doc.id, user:userData, lastMsg });
+      }
+      items.sort((a,b)=>(a.user.displayName||'').localeCompare(b.user.displayName||''));
+      const list = document.getElementById('chatList');
+      if (!list) return;
+      list.innerHTML = items.length ? '' : '<div class="empty-state">Нет чатов</div>';
+      items.forEach(item=>{
+        const div = document.createElement('div'); div.className='list-item';
+        div.innerHTML = `<div class="avatar">${item.user.groupAvatar?`<img src="${item.user.groupAvatar}">`:(item.user.photoURL?`<img src="${item.user.photoURL}">`:((item.user.displayName||'?').charAt(0)))}</div><div class="item-info"><div class="item-title">${item.user.displayName||'Контакт'}${item.user.isGroup?' <span class="group-badge">группа</span>':''}</div><div class="item-subtitle">${item.lastMsg||(item.user.groupDesc||'Начните общение')}</div></div>`;
+        div.onclick = () => { currentChat = { chatId:item.chatId, otherUser:item.user }; renderChat(); };
+        list.appendChild(div);
+      });
+    }
+    function listenChats() {
+      if (chatListUnsubscribe) chatListUnsubscribe();
+      loadAllChats();
+      chatListUnsubscribe = db.collection('chats').where('participants','array-contains',currentUser.uid).onSnapshot(async snap=>await renderChatList(snap));
+    }
+
+    window.switchTab = (tab) => {
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('chatList').style.display = 'none';
+      document.getElementById('contactList').style.display = 'none';
+      document.getElementById('systemList').style.display = 'none';
+      if (tab==='chats') { document.querySelector('.tab:nth-child(1)').classList.add('active'); document.getElementById('chatList').style.display='block'; }
+      else if (tab==='contacts') { document.querySelector('.tab:nth-child(2)').classList.add('active'); document.getElementById('contactList').style.display='block'; loadContacts(); }
+      else { document.querySelector('.tab:nth-child(3)').classList.add('active'); document.getElementById('systemList').style.display='block'; loadSystemList(); }
+    };
+
+    // ============ PROFILE ============
+    window.openProfile = () => {
+      document.getElementById('profileName').value = currentUserProfile?.displayName||'';
+      document.getElementById('profileBio').value = currentUserProfile?.bio||'';
+      document.getElementById('profilePhone').textContent = currentUserProfile?.phone||'Не указан';
+      const a = document.getElementById('profileAvatar'), p = document.getElementById('avatarPlaceholder');
+      if (currentUserProfile?.photoURL) { a.src = currentUserProfile.photoURL; a.style.display='block'; p.style.display='none'; }
+      else { a.style.display='none'; p.style.display='flex'; }
+      document.getElementById('profileModal').classList.add('active');
+    };
+    window.closeProfile = () => document.getElementById('profileModal').classList.remove('active');
+    window.uploadAvatar = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 2*1024*1024) { alert('Макс. 2MB'); return; }
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const base64 = ev.target.result;
+        await db.collection('users').doc(currentUser.uid).update({ photoURL: base64 });
+        currentUserProfile.photoURL = base64;
+        document.getElementById('profileAvatar').src = base64;
+        document.getElementById('profileAvatar').style.display = 'block';
+        document.getElementById('avatarPlaceholder').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    };
+    window.saveProfile = async () => {
+      const n = document.getElementById('profileName').value.trim();
+      const b = document.getElementById('profileBio').value.trim();
+      if (!n) return alert('Введите имя');
+      await db.collection('users').doc(currentUser.uid).update({ displayName: n, bio: b });
+      currentUserProfile.displayName = n; currentUserProfile.bio = b;
+      closeProfile();
+    };
+
+    // ============ CHANGE PHONE ============
+    let timerInterval = null;
+    function updateTimer() {
+      const btn = document.getElementById('newCodeBtn'), t = document.getElementById('timerText');
+      if (!codeExpiry) { t.textContent=''; if(btn) btn.disabled=false; if(timerInterval) clearInterval(timerInterval); return; }
+      const rem = Math.max(0, Math.ceil((codeExpiry-Date.now())/1000));
+      if (rem<=0) { t.textContent=''; if(btn) btn.disabled=false; codeExpiry=null; if(timerInterval) clearInterval(timerInterval); }
+      else { t.textContent = `Новый код через ${rem} сек.`; if(btn) btn.disabled=true; if(!timerInterval) timerInterval = setInterval(()=>updateTimer(),1000); }
+    }
+    window.openChangePhone = async () => {
+      document.getElementById('changePhoneModal').classList.add('active');
+      document.getElementById('newPhoneSection').style.display = 'none';
+      document.getElementById('verificationCode').value = '';
+      document.getElementById('verificationCode').disabled = false;
+      updateTimer();
+      if (!verificationCode || !codeExpiry || Date.now()>=codeExpiry) await sendVerificationCode();
+    };
+    async function sendVerificationCode() {
+      verificationCode = Math.floor(100000+Math.random()*900000).toString();
+      codeExpiry = Date.now()+60000;
+      updateTimer();
+      const botId='verification-bot', chatId=[currentUser.uid,botId].sort().join('_');
+      await db.collection('users').doc(botId).set({ displayName:'🔐 Verification', email:'ver@sys' }, { merge:true });
+      await db.collection('chats').doc(chatId).set({ participants:[currentUser.uid,botId], updatedAt:firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
+      await db.collection('chats').doc(chatId).collection('messages').add({ senderId:botId, text:`Ваш код подтверждения: ${verificationCode}`, timestamp:firebase.firestore.FieldValue.serverTimestamp() });
+      currentChat = { chatId, otherUser:{ displayName:'🔐 Verification', email:'ver@sys' } };
+      renderChat();
+    }
+    window.requestNewCode = () => { if (!codeExpiry || Date.now()>=codeExpiry) sendVerificationCode(); };
+    window.closeChangePhone = () => { document.getElementById('changePhoneModal').classList.remove('active'); if(timerInterval) clearInterval(timerInterval); };
+    window.verifyCode = () => {
+      if (document.getElementById('verificationCode').value.trim()===verificationCode) {
+        document.getElementById('newPhoneSection').style.display = 'block';
+        document.getElementById('verificationCode').disabled = true;
+      } else alert('Неверный код');
+    };
+    window.confirmNewPhone = async () => {
+      const phone = document.getElementById('newPhone').value.trim();
+      if (!phone) return alert('Введите номер');
+      await db.collection('users').doc(currentUser.uid).update({ phone });
+      currentUserProfile.phone = phone;
+      document.getElementById('profilePhone').textContent = phone;
+      document.getElementById('changePhoneModal').classList.remove('active');
+      if (timerInterval) clearInterval(timerInterval);
+    };
+
+    window.openSettings = () => { updateThemeUI(); document.getElementById('settingsModal').classList.add('active'); };
+    window.closeSettings = () => document.getElementById('settingsModal').classList.remove('active');
+    document.querySelectorAll('.modal').forEach(modal=>modal.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('active'); }));
+
+    // ============ WEBRTC CALLS ============
     window.startCall = async () => {
       if (!currentChat || callInProgress) return;
-      
-      // Проверка HTTPS
       if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
         alert('❌ Звонки работают только по HTTPS. Откройте сайт через https://...');
         return;
       }
-
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video:true });
         callInProgress = true;
-
         const callDocRef = db.collection('calls').doc();
         currentCallDocId = callDocRef.id;
         await callDocRef.set({
@@ -208,35 +808,105 @@
           participants: [currentUser.uid, currentChat.otherUser.id],
           callerId: currentUser.uid,
           status: 'ringing',
-          offer: null,
-          answer: null,
-          candidates: [],
+          offer: null, answer: null, candidates: [],
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-
         await createPeerConnection();
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        localStream.getTracks().forEach(track=>peerConnection.addTrack(track,localStream));
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
         await callDocRef.update({ offer: JSON.stringify(offer) });
-
         listenCallDoc(callDocRef);
         showCallUI();
-
       } catch (e) {
-        console.error('Ошибка звонка:', e);
-        if (e.name === 'NotAllowedError') {
-          alert('⛔ Доступ к камере/микрофону запрещён. Разрешите в настройках браузера и обновите страницу.');
-        } else if (e.name === 'NotFoundError') {
-          alert('📷 Не найдена камера или микрофон.');
-        } else {
-          alert('❌ Ошибка доступа к медиа: ' + e.message);
-        }
+        console.error(e);
+        if (e.name==='NotAllowedError') alert('⛔ Доступ к камере/микрофону запрещён. Разрешите в настройках браузера и обновите страницу.');
+        else if (e.name==='NotFoundError') alert('📷 Не найдена камера или микрофон.');
+        else alert('❌ Ошибка: '+e.message);
         endCall();
       }
     };
+    async function createPeerConnection() {
+      peerConnection = new RTCPeerConnection({ iceServers:[{ urls:'stun:stun.l.google.com:19302' }] });
+      peerConnection.ontrack = (event) => {
+        const remoteVideo = document.getElementById('remoteVideo');
+        if (remoteVideo && event.streams[0]) remoteVideo.srcObject = event.streams[0];
+      };
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate && currentCallDocId) {
+          db.collection('calls').doc(currentCallDocId).update({ candidates: firebase.firestore.FieldValue.arrayUnion(JSON.stringify(event.candidate)) });
+        }
+      };
+      peerConnection.oniceconnectionstatechange = () => {
+        if (peerConnection && (peerConnection.iceConnectionState==='disconnected'||peerConnection.iceConnectionState==='failed')) endCall();
+      };
+    }
+    function listenCallDoc(callDocRef) {
+      if (callDocListener) callDocListener();
+      callDocListener = callDocRef.onSnapshot(async (doc) => {
+        if (!doc.exists) { endCall(); return; }
+        const data = doc.data();
+        if (data.status==='ended') { endCall(); return; }
+        if (data.callerId===currentUser.uid && data.answer && peerConnection && peerConnection.signalingState!=='stable') {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.answer)));
+        }
+        if (data.candidates && peerConnection) {
+          for (const candStr of data.candidates) {
+            try { await peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(candStr))); } catch(e){}
+          }
+        }
+      });
+    }
+    function listenForIncomingCalls() {
+      db.collection('calls').where('participants','array-contains',currentUser.uid).where('status','==','ringing').onSnapshot(async(snap)=>{
+        for (const change of snap.docChanges()) {
+          if (change.type==='added') {
+            const doc = change.doc, data = doc.data();
+            if (data.callerId===currentUser.uid) continue;
+            if (callInProgress) { await doc.ref.update({ status:'ended' }); continue; }
+            if (confirm(`📞 Входящий звонок от ${data.callerId.substring(0,6)}... Принять?`)) await acceptCall(doc);
+            else await doc.ref.update({ status:'ended' });
+          }
+        }
+      });
+    }
+    async function acceptCall(callDoc) {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video:true });
+        callInProgress = true;
+        currentCallDocId = callDoc.id;
+        const data = callDoc.data();
+        await createPeerConnection();
+        localStream.getTracks().forEach(track=>peerConnection.addTrack(track,localStream));
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.offer)));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        await callDoc.ref.update({ answer:JSON.stringify(answer), status:'active' });
+        listenCallDoc(callDoc.ref);
+        showCallUI();
+      } catch(e) { console.error(e); endCall(); }
+    }
+    window.endCall = () => {
+      if (currentCallDocId) db.collection('calls').doc(currentCallDocId).update({ status:'ended' }).catch(()=>{});
+      if (localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream = null; }
+      if (peerConnection) { peerConnection.close(); peerConnection = null; }
+      if (callDocListener) { callDocListener(); callDocListener = null; }
+      callInProgress = false; currentCallDocId = null;
+      closeCallUI();
+    };
+    function showCallUI() {
+      const existing = document.getElementById('callModal');
+      if (existing) existing.remove();
+      const modal = document.createElement('div'); modal.id='callModal';
+      modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+      modal.innerHTML = `<video id="localVideo" autoplay muted playsinline style="position:absolute;top:20px;right:20px;width:120px;height:160px;border-radius:12px;object-fit:cover;border:2px solid #fff;z-index:2;"></video><video id="remoteVideo" autoplay playsinline style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;"></video><div style="position:absolute;bottom:40px;z-index:2;"><button onclick="window.endCall()" style="width:70px;height:70px;border-radius:50%;background:#e74c3c;color:#fff;border:none;font-size:2rem;cursor:pointer;">📞</button></div>`;
+      document.body.appendChild(modal);
+      const localVideo = document.getElementById('localVideo');
+      if (localVideo && localStream) localVideo.srcObject = localStream;
+    }
+    function closeCallUI() { const modal = document.getElementById('callModal'); if (modal) modal.remove(); }
 
-    // ... (остальные функции звонков без изменений) ...
+    console.log('Мессенджер готов.');
   </script>
 </body>
 </html>
