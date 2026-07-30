@@ -52,7 +52,7 @@
     .list { flex: 1; overflow-y: auto; }
     .list-item { margin: 8px 16px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); transition: all 0.3s; }
     .list-item:hover { border-color: var(--primary); transform: translateY(-2px); }
-    .avatar { width: 52px; height: 52px; border-radius: 16px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.3rem; flex-shrink: 0; overflow: hidden; }
+    .avatar { width: 52px; height: 52px; border-radius: 16px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.3rem; flex-shrink: 0; overflow: hidden; cursor: pointer; }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
     .item-info { flex: 1; min-width: 0; }
     .item-title { font-weight: 700; font-size: 1rem; }
@@ -79,17 +79,17 @@
     .save-btn { position: absolute; top: -6px; right: -6px; background: var(--primary); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 0.8rem; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 10; }
     .msg-wrapper:hover .save-btn { display: flex; }
     .typing-indicator { font-size: 0.8rem; color: var(--text-secondary); padding: 4px 20px; font-style: italic; }
-    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .input-area { padding: 14px 20px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .input-area input { flex: 1; min-width: 150px; padding: 14px 20px; border: 1px solid var(--border); border-radius: 30px; font-size: 0.95rem; outline: none; background: var(--bg); color: var(--text); }
-    .input-area button { height: 50px; border-radius: 30px; border: none; background: var(--primary); color: #fff; font-size: 1.2rem; cursor: pointer; padding: 0 16px; white-space: nowrap; }
     .attach-btn { background: transparent; border: 1px solid var(--border); color: var(--text); width: 40px; height: 40px; border-radius: 50%; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .tools-panel { display: none; flex-wrap: wrap; gap: 8px; padding: 8px 20px; background: var(--surface); border-top: 1px solid var(--border); }
     .tools-panel.active { display: flex; }
     .tool-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
     .tool-btn:hover { background: var(--primary); color: #fff; }
     .tool-btn.recording { background: #e74c3c; color: #fff; border-color: #e74c3c; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .input-area { padding: 14px 20px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .input-area input { flex: 1; min-width: 150px; padding: 14px 20px; border: 1px solid var(--border); border-radius: 30px; font-size: 0.95rem; outline: none; background: var(--bg); color: var(--text); }
+    .input-area button { height: 50px; border-radius: 30px; border: none; background: var(--primary); color: #fff; font-size: 1.2rem; cursor: pointer; padding: 0 16px; white-space: nowrap; }
 
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; visibility: hidden; opacity: 0; transition: 0.3s; }
     .modal.active { visibility: visible; opacity: 1; }
@@ -112,7 +112,7 @@
   <div id="authScreen" class="auth-screen active">
     <h2 id="authTitle">Вход</h2>
     <input type="email" id="email" placeholder="Email"><input type="password" id="password" placeholder="Пароль">
-    <div id="extraFields" style="display:none;"><input type="text" id="displayName" placeholder="Имя"><input type="tel" id="phone" placeholder="Телефон"></div>
+    <div id="extraFields" style="display:none;"><input type="text" id="displayName" placeholder="Имя"><input type="tel" id="phone" placeholder="Телефон (только цифры)" pattern="[0-9]*" inputmode="numeric"></div>
     <div class="auth-error" id="authError"></div>
     <button id="authBtn" onclick="handleAuth()">Войти</button>
     <div class="toggle-text"><span onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</span></div>
@@ -132,6 +132,7 @@
   <div id="scheduleModal" class="modal"><div class="modal-content"><h3>Отложенное</h3><input type="text" id="scheduleText" placeholder="Текст"><input type="datetime-local" id="scheduleTime"><button onclick="sendScheduled()">Запланировать</button><button class="btn-secondary" onclick="closeSchedule()">Отмена</button></div></div>
   <div id="settingsModal" class="modal"><div class="modal-content"><h3>Настройки</h3><p style="color:var(--text-secondary);">Тема</p><div class="theme-options"><div class="theme-opt active" onclick="setTheme('default')">☀️</div><div class="theme-opt" onclick="setTheme('dark')">🌙</div><div class="theme-opt" onclick="setTheme('cyberforce')">🌿</div><div class="theme-opt" onclick="setTheme('cherry')">🍒</div><div class="theme-opt" onclick="setTheme('ocean')">🌊</div><div class="theme-opt" onclick="setTheme('caramel')">☕</div></div><button class="btn-secondary" onclick="closeSettings()" style="margin-top:20px;">Закрыть</button></div></div>
   <div id="profileModal" class="modal"><div class="modal-content"><h3>Профиль</h3><div class="profile-avatar-upload" onclick="document.getElementById('avatarInput').click()"><img id="profileAvatar" src="" style="display:none;"><span id="avatarPlaceholder" style="font-size:2rem;">📷</span></div><input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)"><label>Имя</label><input type="text" id="profileName"><label>О себе</label><textarea id="profileBio" rows="3" placeholder="Расскажите о себе..."></textarea><label>Телефон</label><div style="display:flex;align-items:center;gap:10px;"><span id="profilePhone" style="flex:1;padding:14px;background:var(--bg);border-radius:14px;"></span><button class="btn-secondary" onclick="openChangePhone()" style="width:auto;padding:14px 20px;">Сменить</button></div><button onclick="saveProfile()" style="margin-top:16px;">Сохранить</button><button class="btn-secondary" onclick="closeProfile()">Отмена</button></div></div>
+  <div id="userInfoModal" class="modal"><div class="modal-content" id="userInfoContent"></div></div>
   <div id="changePhoneModal" class="modal"><div class="modal-content"><h3>Смена номера</h3><p style="color:var(--text-secondary);font-size:0.9rem;">Код отправлен в чат Verification</p><input type="text" id="verificationCode" placeholder="Введите код"><div style="display:flex;gap:10px;margin-top:10px;"><button onclick="verifyCode()">Проверить</button><button id="newCodeBtn" style="background:none;border:none;color:var(--primary);" onclick="requestNewCode()">Новый код</button></div><div id="timerText" style="font-size:0.85rem;color:var(--text-secondary);margin-top:6px;"></div><div id="newPhoneSection" style="display:none;margin-top:14px;"><input type="tel" id="newPhone" placeholder="Новый номер"><button onclick="confirmNewPhone()" style="margin-top:10px;">Подтвердить</button></div><button class="btn-secondary" onclick="closeChangePhone()" style="margin-top:10px;">Отмена</button></div></div>
 
   <script>
@@ -155,7 +156,7 @@
     function isReadonly(){if(!currentChat)return true;const otherId=currentChat.chatId.split('_').find(id=>id!==currentUser.uid);return READONLY_IDS.includes(otherId);}
 
     window.toggleMode=()=>{isLogin=!isLogin;document.getElementById('authTitle').textContent=isLogin?'Вход':'Регистрация';document.getElementById('authBtn').textContent=isLogin?'Войти':'Зарегистрироваться';document.getElementById('extraFields').style.display=isLogin?'none':'block';};
-    window.handleAuth=async()=>{const e=document.getElementById('email').value.trim(),p=document.getElementById('password').value.trim(),n=document.getElementById('displayName').value.trim(),ph=document.getElementById('phone').value.trim();if(!e||!p)return document.getElementById('authError').textContent='Заполните email и пароль';if(!isLogin&&(!n||!ph))return document.getElementById('authError').textContent='Заполните имя и телефон';try{if(isLogin)await auth.signInWithEmailAndPassword(e,p);else{const c=await auth.createUserWithEmailAndPassword(e,p);await db.collection('users').doc(c.user.uid).set({email:e,displayName:n,phone:ph,bio:'',photoURL:''});}}catch(err){document.getElementById('authError').textContent=err.message;}};
+    window.handleAuth=async()=>{const e=document.getElementById('email').value.trim(),p=document.getElementById('password').value.trim(),n=document.getElementById('displayName').value.trim(),ph=document.getElementById('phone').value.trim();if(!e||!p)return document.getElementById('authError').textContent='Заполните email и пароль';if(!isLogin&&!n)return document.getElementById('authError').textContent='Введите имя';if(!isLogin&&(!ph||!/^[\d()+-\s]*$/.test(ph)))return document.getElementById('authError').textContent='Телефон должен содержать только цифры';try{if(isLogin)await auth.signInWithEmailAndPassword(e,p);else{const c=await auth.createUserWithEmailAndPassword(e,p);await db.collection('users').doc(c.user.uid).set({email:e,displayName:n,phone:ph,bio:'',photoURL:''});}}catch(err){document.getElementById('authError').textContent=err.message;}};
     window.logout=()=>auth.signOut();
 
     async function ensureSystemChats(uid){for(const[botId,profile]of Object.entries(SYSTEM_BOTS)){await db.collection('users').doc(botId).set(profile,{merge:true});const chatId=[uid,botId].sort().join('_');const ref=db.collection('chats').doc(chatId);if(!(await ref.get()).exists){await ref.set({participants:[uid,botId],updatedAt:firebase.firestore.FieldValue.serverTimestamp()});if(botId==='favorites-bot')await ref.collection('messages').add({senderId:botId,text:'📌 Ваш личный чат для заметок',timestamp:firebase.firestore.FieldValue.serverTimestamp()});if(botId==='saved-bot')await ref.collection('messages').add({senderId:botId,text:'💾 Здесь будут ваши сохранённые сообщения',timestamp:firebase.firestore.FieldValue.serverTimestamp()});}}}
@@ -166,6 +167,8 @@
 
     async function loadContacts(query){document.getElementById('contactList').innerHTML=`<div class="search-box"><div class="phone-row"><select id="countryCode">${COUNTRY_CODES.map(c=>`<option value="${c.code}">${c.name}</option>`).join('')}</select><input type="tel" id="searchPhone" placeholder="Введите номер"></div><button class="search-btn" onclick="searchByPhone()">Найти</button></div>`;if(query){const snap=await db.collection('users').where('phone','==',query).get();const list=document.getElementById('contactList');if(snap.empty){list.innerHTML+='<div style="padding:20px;text-align:center;color:var(--text-secondary);">Не найдено</div>';return;}snap.forEach(doc=>{if(doc.id===currentUser.uid)return;const u=doc.data();const div=document.createElement('div');div.className='list-item';div.innerHTML=`<div class="avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.displayName||u.email).charAt(0)}</div><div class="item-info"><div class="item-title">${u.displayName||u.email}</div>${u.bio?`<div class="item-subtitle">${u.bio}</div>`:''}</div>`;div.onclick=()=>openChat(doc.id,u);list.appendChild(div);});}}
     window.searchByPhone=()=>{const code=document.getElementById('countryCode')?.value||'+7';const phone=document.getElementById('searchPhone')?.value.trim();if(phone)loadContacts(code+phone);};
+
+    window.showUserInfo=async(uid)=>{const doc=await db.collection('users').doc(uid).get();if(doc.exists){const u=doc.data();document.getElementById('userInfoContent').innerHTML=`<h3>${u.displayName||'Пользователь'}</h3><p><strong>О себе:</strong> ${u.bio||'Не указано'}</p><p><strong>Телефон:</strong> ${u.phone||'Не указан'}</p><button class="btn-secondary" onclick="document.getElementById('userInfoModal').classList.remove('active')">Закрыть</button>`;document.getElementById('userInfoModal').classList.add('active');}};
 
     async function openChat(otherId,otherUser){const chatId=[currentUser.uid,otherId].sort().join('_');await db.collection('chats').doc(chatId).set({participants:[currentUser.uid,otherId],updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});currentChat={chatId,otherUser};renderChat();}
     
@@ -184,7 +187,7 @@
     function renderChat(){
       const u=currentChat.otherUser;const showSaveBtn=!isSaveDisabled();const readonly=isReadonly();
       document.getElementById('chatPanel').innerHTML=`
-        <div class="chat-header"><button class="back-btn" onclick="closeChat()">←</button><div class="avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.displayName||u.email).charAt(0)}</div><div style="font-weight:700;">${u.displayName||u.email}</div></div>
+        <div class="chat-header"><button class="back-btn" onclick="closeChat()">←</button><div class="avatar" onclick="showUserInfo('${currentChat.chatId.split('_').find(id=>id!==currentUser.uid)}')">${u.photoURL?`<img src="${u.photoURL}">`:(u.displayName||u.email).charAt(0)}</div><div style="font-weight:700;">${u.displayName||u.email}</div></div>
         <div class="messages" id="msgContainer"></div>
         <div class="typing-indicator" id="typingIndicator"></div>
         ${!readonly?`
@@ -220,7 +223,7 @@
     function listenChats(){db.collection('chats').where('participants','array-contains',currentUser.uid).orderBy('updatedAt','desc').onSnapshot(async snap=>{const items=[];for(const doc of snap.docs){try{const data=doc.data();const otherId=data.participants.find(id=>id!==currentUser.uid);if(!otherId||SYSTEM_IDS.includes(otherId))continue;const userDoc=await db.collection('users').doc(otherId).get();if(!userDoc.exists)continue;const u=userDoc.data();let lastMsg='';try{const msgs=await db.collection('chats').doc(doc.id).collection('messages').orderBy('timestamp','desc').limit(1).get();msgs.forEach(m=>{const d=m.data();lastMsg=d.audio?'[Голосовое]':d.image?'[Фото]':d.video?'[Видео]':d.text;});}catch(e){}items.push({chatId:doc.id,user:u,lastMsg});}catch(e){}}
       items.sort((a,b)=>(a.user.displayName||'').localeCompare(b.user.displayName||''));
       document.getElementById('chatList').innerHTML='';if(items.length===0){document.getElementById('chatList').innerHTML='<div style="padding:60px;text-align:center;color:var(--text-secondary);">Нет чатов</div>';return;}
-      items.forEach(item=>{const div=document.createElement('div');div.className='list-item';div.innerHTML=`<div class="avatar">${item.user.photoURL?`<img src="${item.user.photoURL}">`:(item.user.displayName||item.user.email).charAt(0)}</div><div class="item-info"><div class="item-title">${item.user.displayName||item.user.email}</div><div class="item-subtitle">${item.lastMsg||'Нет сообщений'}</div></div>`;div.onclick=()=>{currentChat={chatId:item.chatId,otherUser:item.user};renderChat();};document.getElementById('chatList').appendChild(div);});});}
+      items.forEach(item=>{const div=document.createElement('div');div.className='list-item';div.innerHTML=`<div class="avatar" onclick="showUserInfo('${item.chatId.split('_').find(id=>id!==currentUser.uid)}')">${item.user.photoURL?`<img src="${item.user.photoURL}">`:(item.user.displayName||item.user.email).charAt(0)}</div><div class="item-info"><div class="item-title">${item.user.displayName||item.user.email}</div><div class="item-subtitle">${item.lastMsg||'Нет сообщений'}</div></div>`;div.onclick=()=>{currentChat={chatId:item.chatId,otherUser:item.user};renderChat();};document.getElementById('chatList').appendChild(div);});});}
     
     window.switchTab=function(tab){
       document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
