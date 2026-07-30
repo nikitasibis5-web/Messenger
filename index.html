@@ -946,6 +946,8 @@
         if (!otherId || SYSTEM_IDS.includes(otherId)) continue;
         let userData = { displayName:'Контакт', email:'', phone:'' };
         try { const userDoc = await db.collection('users').doc(otherId).get(); if (userDoc.exists) userData = userDoc.data(); else userData.displayName = 'Пользователь '+otherId.substring(0,8); } catch(e){}
+        // ВАЖНО: добавляем ID собеседника, чтобы звонок работал
+        userData.id = otherId;
         let lastMsg = '';
         try { const msgs = await db.collection('chats').doc(doc.id).collection('messages').orderBy('timestamp','desc').limit(1).get(); if (!msgs.empty) { const d = msgs.docs[0].data(); lastMsg = d.audio?'[Голосовое]':d.image?'[Фото]':d.video?'[Видео]':(d.text||''); } } catch(e){}
         items.push({ chatId:doc.id, user:userData, lastMsg, otherId:otherId });
@@ -1094,6 +1096,15 @@
     // ============ AUDIO CALLS (WebRTC) ============
     window.startCall = async () => {
       if (!currentChat || callInProgress) return;
+      if (currentChat.otherUser.isChannel || currentChat.otherUser.isGroup) {
+        alert('📞 Звонки только в личных чатах');
+        return;
+      }
+      const otherUserId = currentChat.otherUser.id;
+      if (!otherUserId) {
+        alert('Ошибка: не удалось определить собеседника. Перезайдите в чат.');
+        return;
+      }
       if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
         alert('❌ Звонки работают только по HTTPS. Откройте сайт через https://...');
         return;
@@ -1105,14 +1116,16 @@
         currentCallDocId = callDocRef.id;
         await callDocRef.set({
           chatId: currentChat.chatId,
-          participants: [currentUser.uid, currentChat.otherUser.id],
+          participants: [currentUser.uid, otherUserId],
           callerId: currentUser.uid,
           status: 'ringing',
-          offer: null, answer: null, candidates: [],
+          offer: null,
+          answer: null,
+          candidates: [],
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         await createPeerConnection();
-        localStream.getTracks().forEach(track=>peerConnection.addTrack(track,localStream));
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
         await callDocRef.update({ offer: JSON.stringify(offer) });
@@ -1120,9 +1133,9 @@
         showCallUI();
       } catch (e) {
         console.error(e);
-        if (e.name==='NotAllowedError') alert('⛔ Доступ к микрофону запрещён.');
-        else if (e.name==='NotFoundError') alert('🎤 Микрофон не найден.');
-        else alert('❌ Ошибка: '+e.message);
+        if (e.name === 'NotAllowedError') alert('⛔ Доступ к микрофону запрещён.');
+        else if (e.name === 'NotFoundError') alert('🎤 Микрофон не найден.');
+        else alert('❌ Ошибка: ' + e.message);
         endCall();
       }
     };
@@ -1204,7 +1217,7 @@
     }
     function closeCallUI() { const modal = document.getElementById('callModal'); if (modal) modal.remove(); }
 
-    console.log('Мессенджер готов. Редактирование каналов добавлено.');
+    console.log('Мессенджер готов. Баг с undefined при звонке исправлен.');
   </script>
 </body>
 </html>
