@@ -299,6 +299,7 @@
     let callInProgress = false;
     let currentCallDocId = null;
     let callDocListener = null;
+    let incomingCallTimer = null; // Таймер автоотклонения
 
     const SYSTEM_BOTS = {
       'favorites-bot': { displayName: '⭐ Избранное', email: 'fav@sys', phone: '' },
@@ -1135,6 +1136,7 @@
     function showIncomingCallUI(callerName, onAccept, onReject) {
       const existing = document.getElementById('incomingCallNotification');
       if (existing) existing.remove();
+      if (incomingCallTimer) clearTimeout(incomingCallTimer);
 
       const notif = document.createElement('div');
       notif.id = 'incomingCallNotification';
@@ -1159,14 +1161,16 @@
 
       document.getElementById('acceptCallBtn').onclick = () => {
         notif.remove();
+        if (incomingCallTimer) clearTimeout(incomingCallTimer);
         onAccept();
       };
       document.getElementById('rejectCallBtn').onclick = () => {
         notif.remove();
+        if (incomingCallTimer) clearTimeout(incomingCallTimer);
         onReject();
       };
 
-      setTimeout(() => {
+      incomingCallTimer = setTimeout(() => {
         if (document.getElementById('incomingCallNotification')) {
           notif.remove();
           onReject();
@@ -1179,12 +1183,16 @@
       db.collection('calls')
         .where('participants','array-contains',currentUser.uid)
         .where('status','==','ringing')
-        .onSnapshot(async(snap)=>{
-          for (const change of snap.docChanges()) {
-            if (change.type==='added') {
-              const doc = change.doc, data = doc.data();
-              if (data.callerId===currentUser.uid) continue;
-              if (callInProgress) { await doc.ref.update({ status:'ended' }); continue; }
+        .onSnapshot(snap => {
+          snap.docChanges().forEach(async change => {
+            if (change.type === 'added') {
+              const doc = change.doc;
+              const data = doc.data();
+              if (data.callerId === currentUser.uid) return;
+              if (callInProgress) {
+                await doc.ref.update({ status:'ended' });
+                return;
+              }
 
               let callerName = 'Пользователь';
               try {
@@ -1193,13 +1201,12 @@
               } catch(e) {}
 
               playRingtone();
-
               showIncomingCallUI(callerName,
                 () => acceptCall(doc),
                 () => doc.ref.update({ status:'ended' })
               );
             }
-          }
+          });
         });
     }
 
@@ -1219,7 +1226,6 @@
         alert('❌ Звонки работают только по HTTPS. Откройте сайт через https://...');
         return;
       }
-      // Принудительно завершаем предыдущий звонок, если остался мусор
       if (peerConnection || localStream || currentCallDocId || callDocListener) {
         endCall();
       }
@@ -1392,9 +1398,10 @@
       if (modal) modal.remove();
       const notif = document.getElementById('incomingCallNotification');
       if (notif) notif.remove();
+      if (incomingCallTimer) { clearTimeout(incomingCallTimer); incomingCallTimer = null; }
     }
 
-    console.log('Мессенджер готов. Оповещения о звонках работают.');
+    console.log('Мессенджер готов. Звонки исправлены: кнопка "Принять" работает корректно.');
   </script>
 </body>
 </html>
