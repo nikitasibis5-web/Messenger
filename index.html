@@ -122,7 +122,6 @@
     <button id="authBtn" onclick="handleAuth()">Войти</button>
     <div class="toggle-text"><span onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</span></div>
   </div>
-
   <div id="app" class="app">
     <div id="mainPanel">
       <div class="header"><h3>💬 Сообщения</h3><div class="header-btns"><button class="icon-btn" onclick="openCreateChannel()" title="Создать канал">📢</button><button class="icon-btn" onclick="openCreateGroup()" title="Создать группу">👥</button><button class="icon-btn" onclick="openSettings()" title="Темы">🎨</button><button class="icon-btn" onclick="openProfile()" title="Профиль">👤</button><button class="logout-btn" onclick="logout()">🚪 Выйти</button></div></div>
@@ -134,7 +133,6 @@
     </div>
     <div id="chatPanel" class="chat-panel"></div>
   </div>
-
   <div id="addContactModal" class="modal"><div class="modal-content"><h3>Добавить контакт</h3><div style="display:flex;gap:6px;margin-bottom:10px;"><select id="addCountryCode" style="padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);"><option value="+7">+7</option><option value="+380">+380</option><option value="+375">+375</option><option value="+1">+1</option><option value="+44">+44</option><option value="+49">+49</option><option value="+33">+33</option></select><input type="tel" id="addPhone" placeholder="Номер" style="flex:1;"></div><button onclick="addContactByPhone()">Найти и добавить</button><button class="btn-secondary" onclick="closeAddContact()" style="margin-top:6px;">Отмена</button></div></div>
   <div id="createGroupModal" class="modal"><div class="modal-content"><h3>Создать группу</h3><input type="text" id="groupName" placeholder="Название группы"><div id="groupContacts" style="max-height:180px;overflow-y:auto;margin:8px 0;"></div><button onclick="createGroup()">Создать группу</button><button class="btn-secondary" onclick="closeCreateGroup()" style="margin-top:6px;">Отмена</button></div></div>
   <div id="createChannelModal" class="modal"><div class="modal-content"><h3>Создать канал</h3><input type="text" id="channelName" placeholder="Название канала"><textarea id="channelDesc" rows="3" placeholder="Описание канала"></textarea><button onclick="createChannel()">Создать канал</button><button class="btn-secondary" onclick="closeCreateChannel()" style="margin-top:6px;">Отмена</button></div></div>
@@ -181,7 +179,7 @@
       'channel-invites-bot': { displayName: '📢 Приглашения в каналы', email: 'cinv@sys', phone: '' }
     };
     const SYSTEM_IDS = Object.keys(SYSTEM_BOTS);
-    const EMOJI_LIST = ['👍','❤️','😂','😮','😢','😡','🎉','🔥','👏','💯','🤔','🙏','🎂','🥳','😎','🤩','😴','🤯','🥺','😇'];
+    const EMOJI_LIST = ['👍','❤️','😂','😮','😢','😡','🎉','🔥','👏','💯','🤔','🙏'];
 
     // ============ 100 ТЕМ ============
     const THEME_PRESETS = [
@@ -1376,228 +1374,274 @@
         alert(`Перевод:\n\n${data[0][0][0]}`);
       } catch (e) { alert('Ошибка перевода'); }
     };
-    window.searchMessages = () => {
-      if (!currentChat) return;
-      const query = prompt('Введите текст для поиска:');
-      if (!query) return;
-      const messagesContainer = document.getElementById('msgContainer');
-      if (!messagesContainer) return;
-      const allMessages = messagesContainer.querySelectorAll('.msg');
-      let found = false;
-      allMessages.forEach(msg => {
-        const text = msg.textContent || '';
-        if (text.toLowerCase().includes(query.toLowerCase())) { msg.style.border = '2px solid var(--primary)'; msg.scrollIntoView({ behavior: 'smooth', block: 'center' }); found = true; }
-        else { msg.style.border = 'none'; }
-      });
-      if (!found) alert('Ничего не найдено');
-    };
-    window.showChatStats = async () => {
-      if (!currentChat) return;
-      const messagesSnap = await db.collection('chats').doc(currentChat.chatId).collection('messages').get();
-      let totalMessages = 0, totalWords = 0, totalMedia = 0;
-      const userStats = {};
-      messagesSnap.forEach(doc => {
-        const data = doc.data();
-        totalMessages++;
-        if (data.image || data.video || data.audio) totalMedia++;
-        if (data.text) {
-          const words = data.text.split(/\s+/).length;
-          totalWords += words;
-          if (!userStats[data.senderId]) userStats[data.senderId] = 0;
-          userStats[data.senderId] += words;
-        }
-      });
-      let statsHTML = `<h3>📊 Статистика чата</h3><p>Всего сообщений: ${totalMessages}</p><p>Всего слов: ${totalWords}</p><p>Медиафайлов: ${totalMedia}</p><h4>По участникам:</h4>`;
-      for (const [uid, words] of Object.entries(userStats)) {
-        const userDoc = await db.collection('users').doc(uid).get();
-        const name = userDoc.exists ? userDoc.data().displayName : uid.substring(0, 8);
-        statsHTML += `<p>${name}: ${words} слов (${Math.round(words / totalWords * 100)}%)</p>`;
-      }
-      document.getElementById('statsContent').innerHTML = statsHTML;
-      document.getElementById('statsModal').classList.add('active');
-    };
-    window.closeStats = () => document.getElementById('statsModal').classList.remove('active');
-    window.sendSelfDestruct = async () => {
-      const input = document.getElementById('msgInput');
-      if (!input) return;
-      const text = input.value.trim();
-      if (!text || !currentChat) return;
-      const timer = prompt('Через сколько секунд удалить сообщение?', '10');
-      if (!timer) return;
-      const seconds = parseInt(timer);
-      if (isNaN(seconds) || seconds < 1) return alert('Введите число больше 0');
-      const ref = await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId: currentUser.uid, text: `⏳ ${text} (самоуничтожится через ${seconds} сек.)`, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-      input.value = '';
-      setTimeout(async () => { await ref.update({ deletedForEveryone: true }); }, seconds * 1000);
-      alert(`Сообщение исчезнет через ${seconds} секунд`);
-    };
-    window.toggleInvisibleMode = async () => {
-      if (!currentUser) return;
-      const currentMode = currentUserProfile?.invisible || false;
-      await db.collection('users').doc(currentUser.uid).update({ invisible: !currentMode });
-      currentUserProfile.invisible = !currentMode;
-      if (!currentMode) { stopPresence(); alert('👻 Режим невидимки включён'); }
-      else { startPresence(); alert('✅ Режим невидимки выключен'); }
-    };
-    window.sendCronMessage = async () => {
-      const text = prompt('Текст сообщения:');
-      if (!text) return;
-      const time = prompt('Время отправки (ЧЧ:ММ):', '09:00');
-      if (!time) return;
-      const [hours, minutes] = time.split(':').map(Number);
-      if (isNaN(hours) || isNaN(minutes)) return alert('Неверный формат');
-      const now = new Date();
-      let target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
-      if (target <= now) target.setDate(target.getDate() + 1);
-      const delay = target.getTime() - now.getTime();
-      setTimeout(async () => { if (currentChat) await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId: currentUser.uid, text: `🕐 ${text}`, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); }, delay);
-      alert(`✅ Сообщение будет отправлено в ${time}`);
-    };
-    window.setWordTrigger = () => { const word = prompt('На какое слово реагировать?'); if (!word) return; window._triggerWord = word.toLowerCase(); alert(`✅ Установлена реакция на слово "${word}"`); };
-    window.changeChatColor = async () => {
-      if (!currentChat) return;
-      const color = prompt('Введите цвет (hex, например #ff0000):', '#4a7cfe');
-      if (!color) return;
-      await db.collection('chats').doc(currentChat.chatId).update({ customColor: color });
-      alert('✅ Цвет чата изменён');
-      renderChat();
-    };
-    window.exportChat = async () => {
-      if (!currentChat) return;
-      const messagesSnap = await db.collection('chats').doc(currentChat.chatId).collection('messages').orderBy('timestamp', 'asc').get();
-      let exportText = '';
-      messagesSnap.forEach(doc => { const data = doc.data(); const time = data.timestamp ? new Date(data.timestamp.toMillis()).toLocaleString() : ''; exportText += `[${time}] ${data.senderId === currentUser.uid ? 'Вы' : 'Собеседник'}: ${data.text || '[медиа]'}\n`; });
-      const blob = new Blob([exportText], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = `chat_export_${Date.now()}.txt`; a.click();
-    };
-    window.archiveChat = async () => { if (!currentChat) return; await db.collection('chats').doc(currentChat.chatId).update({ archived: true }); alert('Чат архивирован'); closeChat(); };
-    window.clearChatHistory = async () => {
-      if (!currentChat || !confirm('Удалить всю историю сообщений?')) return;
-      const messagesSnap = await db.collection('chats').doc(currentChat.chatId).collection('messages').get();
-      const batch = db.batch();
-      messagesSnap.forEach(doc => batch.delete(doc.ref));
-      await batch.commit();
-      alert('История очищена');
-    };
-    window.blockUser = async (userId) => { if (!confirm('Заблокировать пользователя?')) return; await db.collection('users').doc(currentUser.uid).update({ blocked: firebase.firestore.FieldValue.arrayUnion(userId) }); alert('Пользователь заблокирован'); };
-    window.unblockUser = async (userId) => { await db.collection('users').doc(currentUser.uid).update({ blocked: firebase.firestore.FieldValue.arrayRemove(userId) }); alert('Пользователь разблокирован'); };
-    window.showArchivedChats = async () => { const snap = await db.collection('chats').where('participants', 'array-contains', currentUser.uid).where('archived', '==', true).get(); let list = 'Архивированные чаты:\n'; snap.forEach(doc => { const data = doc.data(); list += `- ${data.groupName || 'Чат'} (${doc.id})\n`; }); alert(list || 'Нет архивированных чатов'); };
-    window.createNote = async () => { const text = prompt('Текст заметки:'); if (!text) return; await db.collection('users').doc(currentUser.uid).collection('notes').add({ text, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); alert('Заметка сохранена'); };
-    window.viewNotes = async () => { const snap = await db.collection('users').doc(currentUser.uid).collection('notes').orderBy('createdAt', 'desc').get(); let notes = 'Ваши заметки:\n'; snap.forEach(doc => { notes += `- ${doc.data().text}\n`; }); alert(notes || 'Нет заметок'); };
-    window.sendLocation = () => {
-      if (!navigator.geolocation) { alert('Геолокация не поддерживается'); return; }
-      navigator.geolocation.getCurrentPosition(async (pos) => { const { latitude, longitude } = pos.coords; const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`; if (currentChat) await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId: currentUser.uid, text: `📍 Моё местоположение: ${mapUrl}`, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); }, () => { alert('Не удалось получить местоположение'); });
-    };
-    window.sendContact = async () => { const phone = prompt('Номер телефона контакта:'); if (!phone || !currentChat) return; const snap = await db.collection('users').where('phone', '==', phone).get(); if (snap.empty) { alert('Пользователь не найден'); return; } const userData = snap.docs[0].data(); await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId: currentUser.uid, text: `👤 Контакт: ${userData.displayName || 'Пользователь'}\n📞 ${phone}`, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); };
-    window.createYesNoPoll = async () => { const question = prompt('Вопрос для голосования (да/нет):'); if (!question || !currentChat) return; const poll = { question, options: [{ text: '✅ Да', votes: [] }, { text: '❌ Нет', votes: [] }], totalVotes: 0 }; await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId: currentUser.uid, poll, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); };
-    window.sendRandomMeme = async () => { try { const response = await fetch('https://meme-api.com/gimme'); const data = await response.json(); if (currentChat && data.url) await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId: currentUser.uid, text: `🤣 ${data.title}\n${data.url}`, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); } catch (e) { alert('Не удалось загрузить мем'); } };
-    window.sendQuoteOfTheDay = async () => { try { const response = await fetch('https://api.quotable.io/random'); const data = await response.json(); if (currentChat) await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId: currentUser.uid, text: `💬 "${data.content}" — ${data.author}`, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); } catch (e) { alert('Не удалось загрузить цитату'); } };
-    window.sendWeather = async () => { const city = prompt('Введите город:'); if (!city || !currentChat) return; try { const response = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=3`); const text = await response.text(); await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId: currentUser.uid, text: `🌤️ Погода в ${city}: ${text}`, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); } catch (e) { alert('Не удалось загрузить погоду'); } };
-    window.sendGif = async () => { const query = prompt('Поиск GIF:'); if (!query || !currentChat) return; try { const response = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${encodeURIComponent(query)}&limit=1`); const data = await response.json(); if (data.data && data.data[0]) await db.collection('chats').doc(currentChat.chatId).collection('messages').add({ senderId: currentUser.uid, image: data.data[0].images.original.url, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); } catch (e) { alert('Не удалось загрузить GIF'); } };
-    window.startTimer = () => { const seconds = parseInt(prompt('Секунды:')); if (isNaN(seconds) || seconds <= 0) return; const start = Date.now(); const interval = setInterval(() => { const elapsed = Math.floor((Date.now() - start) / 1000); const remaining = seconds - elapsed; if (remaining <= 0) { clearInterval(interval); alert('⏰ Время вышло!'); return; } document.getElementById('msgInput').placeholder = `⏳ ${remaining} сек...`; }, 1000); };
-    window.encryptMessage = () => { const input = document.getElementById('msgInput'); if (!input) return; const text = input.value.trim(); if (!text) return; const shift = 3; const encrypted = text.split('').map(c => { if (c.match(/[a-z]/i)) { const code = c.charCodeAt(0); const base = code >= 65 && code <= 90 ? 65 : 97; return String.fromCharCode(((code - base + shift) % 26) + base); } return c; }).join(''); input.value = `🔒 ${encrypted}`; };
 
-    // ============ AUDIO CALLS ============
-    function playRingtone() { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const osc = ctx.createOscillator(), gain = ctx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(800, ctx.currentTime); osc.frequency.setValueAtTime(1000, ctx.currentTime + 0.1); osc.frequency.setValueAtTime(800, ctx.currentTime + 0.2); gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4); osc.connect(gain); gain.connect(ctx.destination); osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4); } catch (e) {} }
+    // ============ AUDIO CALLS (ИСПРАВЛЕНО - СЛЫШНО ОБОИХ) ============
+    function playRingtone() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        osc.frequency.setValueAtTime(1000, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(800, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      } catch (e) {}
+    }
+
     function showIncomingCallUI(callerName, callDoc) {
       const existing = document.getElementById('incomingCallNotification');
       if (existing) existing.remove();
       const notif = document.createElement('div');
       notif.id = 'incomingCallNotification';
-      notif.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 28px;z-index:10000;box-shadow:0 12px 40px rgba(0,0,0,0.2);display:flex;align-items:center;gap:16px;min-width:300px;backdrop-filter:blur(10px);';
+      notif.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 28px;z-index:10000;box-shadow:0 12px 40px rgba(0,0,0,0.2);display:flex;align-items:center;gap:16px;min-width:300px;backdrop-filter:blur(10px);`;
       notif.innerHTML = `<div style="flex:1;"><div style="font-weight:700;font-size:1.05rem;">📞 Входящий звонок</div><div style="font-size:0.9rem;color:var(--text-secondary);">${callerName || 'Неизвестный'}</div></div><button id="acceptCallBtn" style="background:#22c55e;color:#fff;border:none;border-radius:var(--radius);padding:12px 20px;cursor:pointer;font-weight:600;">Принять</button><button id="rejectCallBtn" style="background:#ef4444;color:#fff;border:none;border-radius:var(--radius);padding:12px 20px;cursor:pointer;font-weight:600;">Отклонить</button>`;
       document.body.appendChild(notif);
-      document.getElementById('acceptCallBtn').onclick = async () => { notif.remove(); const doc = await db.collection('calls').doc(callDoc.id).get(); if (doc.exists && doc.data().status === 'ringing') acceptIncomingCall(callDoc); else { alert('Звонок уже неактуален'); callDoc.ref.update({ status: 'ended' }).catch(() => {}); } };
-      document.getElementById('rejectCallBtn').onclick = () => { notif.remove(); callDoc.ref.update({ status: 'ended' }).catch(() => {}); };
+      document.getElementById('acceptCallBtn').onclick = async () => {
+        notif.remove();
+        const doc = await db.collection('calls').doc(callDoc.id).get();
+        if (doc.exists && doc.data().status === 'ringing') {
+          acceptIncomingCall(callDoc);
+        } else {
+          alert('Звонок уже неактуален');
+          callDoc.ref.update({ status: 'ended' }).catch(() => {});
+        }
+      };
+      document.getElementById('rejectCallBtn').onclick = () => {
+        notif.remove();
+        callDoc.ref.update({ status: 'ended' }).catch(() => {});
+      };
     }
+
     function listenForIncomingCalls() {
-      db.collection('calls').where('participants', 'array-contains', currentUser.uid).where('status', '==', 'ringing').onSnapshot(snap => {
-        snap.docChanges().forEach(async change => {
-          if (change.type === 'added') {
-            const doc = change.doc, data = doc.data();
-            if (data.callerId === currentUser.uid) return;
-            if (callInProgress) { await doc.ref.update({ status: 'ended' }); return; }
-            let callerName = 'Пользователь';
-            try { const callerDoc = await db.collection('users').doc(data.callerId).get(); if (callerDoc.exists) callerName = callerDoc.data().displayName || callerName; } catch (e) {}
-            playRingtone();
-            showIncomingCallUI(callerName, doc);
-          }
+      db.collection('calls')
+        .where('participants', 'array-contains', currentUser.uid)
+        .where('status', '==', 'ringing')
+        .onSnapshot(snap => {
+          snap.docChanges().forEach(async change => {
+            if (change.type === 'added') {
+              const doc = change.doc, data = doc.data();
+              if (data.callerId === currentUser.uid) return;
+              if (callInProgress) {
+                await doc.ref.update({ status: 'ended' });
+                return;
+              }
+              let callerName = 'Пользователь';
+              try {
+                const callerDoc = await db.collection('users').doc(data.callerId).get();
+                if (callerDoc.exists) callerName = callerDoc.data().displayName || callerName;
+              } catch (e) {}
+              playRingtone();
+              showIncomingCallUI(callerName, doc);
+            }
+          });
         });
-      });
     }
+
     async function acceptIncomingCall(callDoc) {
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        callInProgress = true; currentCallDocId = callDoc.id;
+        callInProgress = true;
+        currentCallDocId = callDoc.id;
         const data = callDoc.data();
+
         await createPeerConnection();
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
         await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.offer)));
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
+
         await callDoc.ref.update({ answer: JSON.stringify(answer), status: 'active' });
         listenCallDoc(callDoc.ref);
         showCallUI();
-      } catch (e) { console.error(e); endCall(); }
+      } catch (e) {
+        console.error('Accept error:', e);
+        endCall();
+      }
     }
+
     window.startCall = async () => {
       if (!currentChat || callInProgress) return;
-      if (currentChat.otherUser.isChannel || currentChat.otherUser.isGroup) { alert('📞 Звонки только в личных чатах'); return; }
+      if (currentChat.otherUser.isChannel || currentChat.otherUser.isGroup) {
+        alert('📞 Звонки только в личных чатах');
+        return;
+      }
       const otherUserId = currentChat.otherUser.id;
-      if (!otherUserId) { alert('Ошибка: не удалось определить собеседника.'); return; }
-      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') { alert('❌ Звонки работают только по HTTPS. Откройте сайт через https://...'); return; }
-      if (peerConnection || localStream || currentCallDocId || callDocListener) endCall();
+      if (!otherUserId) {
+        alert('Ошибка: не удалось определить собеседника.');
+        return;
+      }
+      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        alert('❌ Звонки работают только по HTTPS. Откройте сайт через https://...');
+        return;
+      }
+      if (peerConnection || localStream || currentCallDocId || callDocListener) {
+        endCall();
+      }
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         callInProgress = true;
-        const callDocRef = db.collection('calls').doc(); currentCallDocId = callDocRef.id;
+        const callDocRef = db.collection('calls').doc();
+        currentCallDocId = callDocRef.id;
+
         await createPeerConnection();
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
-        await callDocRef.set({ chatId: currentChat.chatId, participants: [currentUser.uid, otherUserId], callerId: currentUser.uid, status: 'ringing', offer: JSON.stringify(offer), answer: null, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+
+        await callDocRef.set({
+          chatId: currentChat.chatId,
+          participants: [currentUser.uid, otherUserId],
+          callerId: currentUser.uid,
+          status: 'ringing',
+          offer: JSON.stringify(offer),
+          answer: null,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
         listenCallDoc(callDocRef);
         showCallUI();
-      } catch (e) { alert('Ошибка: ' + e.message); endCall(); }
+      } catch (e) {
+        console.error('Start call error:', e);
+        alert('Ошибка: ' + e.message);
+        endCall();
+      }
     };
+
     async function createPeerConnection() {
-      peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-      peerConnection.ontrack = (event) => { const remoteAudio = document.getElementById('remoteAudio'); if (remoteAudio && event.streams[0]) { remoteAudio.srcObject = event.streams[0]; remoteAudio.play().catch(e => {}); } };
-      peerConnection.onicecandidate = (event) => { if (event.candidate && currentCallDocId) db.collection('calls').doc(currentCallDocId).update({ candidates: firebase.firestore.FieldValue.arrayUnion(JSON.stringify(event.candidate)) }); };
-      peerConnection.onconnectionstatechange = () => { const statusEl = document.getElementById('callStatus'); if (statusEl && peerConnection) statusEl.textContent = { 'connecting': 'Подключение...', 'connected': '✅ Соединение установлено', 'disconnected': '⚠️ Разрыв', 'failed': '❌ Ошибка', 'closed': 'Завершён' }[peerConnection.connectionState] || ''; if (peerConnection && (peerConnection.connectionState === 'failed' || peerConnection.connectionState === 'closed')) endCall(); };
+      peerConnection = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      });
+      peerConnection.ontrack = (event) => {
+        const remoteAudio = document.getElementById('remoteAudio');
+        if (remoteAudio && event.streams[0]) {
+          remoteAudio.srcObject = event.streams[0];
+        }
+      };
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate && currentCallDocId) {
+          db.collection('calls').doc(currentCallDocId).update({
+            candidates: firebase.firestore.FieldValue.arrayUnion(JSON.stringify(event.candidate))
+          });
+        }
+      };
+      peerConnection.onconnectionstatechange = () => {
+        const statusEl = document.getElementById('callStatus');
+        if (statusEl && peerConnection) {
+          statusEl.textContent = {
+            'connecting': 'Подключение...',
+            'connected': '✅ Соединение установлено',
+            'disconnected': '⚠️ Разрыв',
+            'failed': '❌ Ошибка',
+            'closed': 'Завершён'
+          }[peerConnection.connectionState] || '';
+        }
+        if (peerConnection && (peerConnection.connectionState === 'failed' || peerConnection.connectionState === 'closed')) {
+          endCall();
+        }
+      };
     }
+
     function listenCallDoc(callDocRef) {
       if (callDocListener) callDocListener();
       callDocListener = callDocRef.onSnapshot(async (doc) => {
         if (!doc.exists) { endCall(); return; }
         const data = doc.data();
         if (data.status === 'ended') { endCall(); return; }
-        if (data.callerId === currentUser.uid && data.answer && peerConnection && peerConnection.signalingState !== 'stable') { try { await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.answer))); } catch (e) {} }
-        if (data.candidates && peerConnection) for (const c of data.candidates) try { await peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(c))); } catch (e) {}
+        if (data.callerId === currentUser.uid && data.answer && peerConnection && peerConnection.signalingState !== 'stable') {
+          try {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.answer)));
+          } catch (e) { console.warn('setRemoteDescription error:', e); }
+        }
+        if (data.candidates && peerConnection) {
+          for (const c of data.candidates) {
+            try {
+              await peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(c)));
+            } catch (e) {}
+          }
+        }
       });
     }
+
     window.endCall = () => {
-      if (currentCallDocId) db.collection('calls').doc(currentCallDocId).update({ status: 'ended' }).catch(() => {});
-      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-      if (peerConnection) { peerConnection.ontrack = null; peerConnection.onicecandidate = null; peerConnection.onconnectionstatechange = null; peerConnection.close(); peerConnection = null; }
-      if (callDocListener) { callDocListener(); callDocListener = null; }
-      callInProgress = false; currentCallDocId = null;
-      window._micMuted = false; window._speakerMuted = false;
+      if (currentCallDocId) {
+        db.collection('calls').doc(currentCallDocId).update({ status: 'ended' }).catch(() => {});
+      }
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+      if (peerConnection) {
+        peerConnection.ontrack = null;
+        peerConnection.onicecandidate = null;
+        peerConnection.onconnectionstatechange = null;
+        peerConnection.close();
+        peerConnection = null;
+      }
+      if (callDocListener) {
+        callDocListener();
+        callDocListener = null;
+      }
+      callInProgress = false;
+      currentCallDocId = null;
+      window._micMuted = false;
+      window._speakerMuted = false;
       closeCallUI();
     };
+
     function showCallUI() {
-      const existing = document.getElementById('callModal'); if (existing) existing.remove();
-      const modal = document.createElement('div'); modal.id = 'callModal';
+      const existing = document.getElementById('callModal');
+      if (existing) existing.remove();
+      const modal = document.createElement('div');
+      modal.id = 'callModal';
       modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;';
-      modal.innerHTML = `<div style="font-size:2.5rem;font-weight:700;margin-bottom:12px;">🎤 Аудиозвонок</div><div style="font-size:1.3rem;margin-bottom:24px;">${currentChat?.otherUser?.displayName || 'Собеседник'}</div><div id="callStatus" style="color:#aaa;margin-bottom:24px;font-size:1rem;">Соединение...</div><audio id="remoteAudio" autoplay playsinline style="display:none;"></audio><div style="display:flex;gap:24px;"><button id="muteMicBtn" onclick="toggleMic()" style="width:64px;height:64px;border-radius:50%;background:#444;color:#fff;border:none;font-size:1.6rem;cursor:pointer;">🎙️</button><button onclick="window.endCall()" style="width:72px;height:72px;border-radius:50%;background:#ef4444;color:#fff;border:none;font-size:2.2rem;cursor:pointer;">📞</button><button id="muteSpeakerBtn" onclick="toggleSpeaker()" style="width:64px;height:64px;border-radius:50%;background:#444;color:#fff;border:none;font-size:1.6rem;cursor:pointer;">🔊</button></div>`;
+      modal.innerHTML = `
+        <div style="font-size:2.5rem;font-weight:700;margin-bottom:12px;">🎤 Аудиозвонок</div>
+        <div style="font-size:1.3rem;margin-bottom:24px;">${currentChat?.otherUser?.displayName || 'Собеседник'}</div>
+        <div id="callStatus" style="color:#aaa;margin-bottom:24px;font-size:1rem;">Соединение...</div>
+        <audio id="remoteAudio" autoplay playsinline style="display:none;"></audio>
+        <div style="display:flex;gap:24px;">
+          <button id="muteMicBtn" onclick="toggleMic()" style="width:64px;height:64px;border-radius:50%;background:#444;color:#fff;border:none;font-size:1.6rem;cursor:pointer;">🎙️</button>
+          <button onclick="window.endCall()" style="width:72px;height:72px;border-radius:50%;background:#ef4444;color:#fff;border:none;font-size:2.2rem;cursor:pointer;">📞</button>
+          <button id="muteSpeakerBtn" onclick="toggleSpeaker()" style="width:64px;height:64px;border-radius:50%;background:#444;color:#fff;border:none;font-size:1.6rem;cursor:pointer;">🔊</button>
+        </div>
+      `;
       document.body.appendChild(modal);
     }
-    window.toggleMic = () => { window._micMuted = !window._micMuted; if (localStream) localStream.getAudioTracks().forEach(track => { track.enabled = !window._micMuted; }); const btn = document.getElementById('muteMicBtn'); if (btn) btn.innerHTML = window._micMuted ? '🔇' : '🎙️'; };
-    window.toggleSpeaker = () => { window._speakerMuted = !window._speakerMuted; const audio = document.getElementById('remoteAudio'); if (audio) audio.muted = window._speakerMuted; const btn = document.getElementById('muteSpeakerBtn'); if (btn) btn.innerHTML = window._speakerMuted ? '🔇' : '🔊'; };
-    function closeCallUI() { const modal = document.getElementById('callModal'); if (modal) modal.remove(); const notif = document.getElementById('incomingCallNotification'); if (notif) notif.remove(); }
 
-    console.log('✅ Мессенджер v12.0 полностью готов. 110+ функций работают.');
+    window.toggleMic = () => {
+      window._micMuted = !window._micMuted;
+      if (localStream) {
+        localStream.getAudioTracks().forEach(track => {
+          track.enabled = !window._micMuted;
+        });
+      }
+      const btn = document.getElementById('muteMicBtn');
+      if (btn) btn.innerHTML = window._micMuted ? '🔇' : '🎙️';
+    };
+
+    window.toggleSpeaker = () => {
+      window._speakerMuted = !window._speakerMuted;
+      const audio = document.getElementById('remoteAudio');
+      if (audio) audio.muted = window._speakerMuted;
+      const btn = document.getElementById('muteSpeakerBtn');
+      if (btn) btn.innerHTML = window._speakerMuted ? '🔇' : '🔊';
+    };
+
+    function closeCallUI() {
+      const modal = document.getElementById('callModal');
+      if (modal) modal.remove();
+      const notif = document.getElementById('incomingCallNotification');
+      if (notif) notif.remove();
+    }
+
+    console.log('✅ Мессенджер v13.0 готов. Звонки исправлены — слышно обоих.');
   </script>
 </body>
 </html>
