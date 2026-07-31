@@ -104,6 +104,46 @@
     .theme-options { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-top: 10px; }
     .theme-opt { padding: 12px 4px; border-radius: 8px; border: 2px solid var(--border); cursor: pointer; text-align: center; font-weight: 600; font-size: 0.7rem; }
     .theme-opt.active { border-color: var(--primary); background: var(--bg); }
+    
+    .call-modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      z-index: 9999; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; color: white; animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 0.7; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.7; } }
+    @keyframes ripple { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); } 100% { box-shadow: 0 0 0 30px rgba(255,255,255,0); } }
+    .call-avatar-ring {
+      width: 120px; height: 120px; border-radius: 50%; background: var(--primary);
+      display: flex; align-items: center; justify-content: center; font-size: 3rem;
+      font-weight: 700; margin-bottom: 16px; animation: pulse-ring 2s infinite;
+      box-shadow: 0 0 60px rgba(255,255,255,0.2); overflow: hidden;
+    }
+    .call-avatar-ring img { width: 100%; height: 100%; object-fit: cover; }
+    .call-name { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+    .call-status { font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-bottom: 40px; letter-spacing: 1px; }
+    .call-timer { font-size: 1.2rem; font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 30px; font-variant-numeric: tabular-nums; }
+    .call-actions { display: flex; gap: 20px; align-items: center; }
+    .call-btn-circle {
+      width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer;
+      font-size: 1.4rem; transition: all 0.2s; display: flex; align-items: center;
+      justify-content: center; backdrop-filter: blur(10px);
+    }
+    .call-btn-circle:active { transform: scale(0.9); }
+    .call-btn-mute { background: rgba(255,255,255,0.15); color: white; }
+    .call-btn-mute:hover { background: rgba(255,255,255,0.25); }
+    .call-btn-mute.muted { background: #ef4444; color: white; }
+    .call-btn-end { width: 70px; height: 70px; background: #ef4444; color: white; animation: ripple 2s infinite; }
+    .call-btn-end:hover { background: #dc2626; transform: scale(1.05); }
+    .call-btn-speaker { background: rgba(255,255,255,0.15); color: white; }
+    .call-btn-speaker:hover { background: rgba(255,255,255,0.25); }
+    .call-btn-speaker.muted { background: #ef4444; color: white; }
+    .call-waves { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; opacity: 0.15; }
+    .call-wave { position: absolute; bottom: 0; width: 200%; height: 80px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); animation: wave 3s ease-in-out infinite; }
+    @keyframes wave { 0% { transform: translateX(-50%) scaleY(0.3); } 50% { transform: translateX(-25%) scaleY(1); } 100% { transform: translateX(-50%) scaleY(0.3); } }
+    .call-wave:nth-child(2) { animation-delay: -1.5s; height: 60px; opacity: 0.7; }
+    
     @media (min-width: 768px) { .app { max-width: 500px; height: 92vh; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); } .auth-screen { max-width: 420px; } }
   </style>
 </head>
@@ -211,12 +251,10 @@
         }, 7000);
       }
       
-      // Создаем начальные сердечки
       for (let i = 0; i < 15; i++) {
         setTimeout(() => createHeart(), i * 300);
       }
       
-      // Создаем новые сердечки периодически
       if (heartsInterval) clearInterval(heartsInterval);
       heartsInterval = setInterval(() => {
         if (container.style.display !== 'none') {
@@ -252,7 +290,6 @@
       document.body.style.fontFamily = theme.font || 'Inter, Nunito, sans-serif';
       localStorage.setItem('theme', themeName);
       
-      // Управление сердечками
       if (theme.hearts) {
         startHearts();
       } else {
@@ -1414,8 +1451,24 @@
       if (existing) existing.remove();
       const notif = document.createElement('div');
       notif.id = 'incomingCallNotification';
-      notif.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 28px;z-index:10000;box-shadow:0 12px 40px rgba(0,0,0,0.2);display:flex;align-items:center;gap:16px;min-width:300px;backdrop-filter:blur(10px);`;
-      notif.innerHTML = `<div style="flex:1;"><div style="font-weight:700;font-size:1.05rem;">📞 Входящий звонок</div><div style="font-size:0.9rem;color:var(--text-secondary);">${callerName || 'Неизвестный'}</div></div><button id="acceptCallBtn" style="background:#22c55e;color:#fff;border:none;border-radius:var(--radius);padding:12px 20px;cursor:pointer;font-weight:600;">Принять</button><button id="rejectCallBtn" style="background:#ef4444;color:#fff;border:none;border-radius:var(--radius);padding:12px 20px;cursor:pointer;font-weight:600;">Отклонить</button>`;
+      notif.style.cssText = `
+        position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+        background:linear-gradient(135deg, #1a1a2e, #16213e);
+        color:white;border-radius:20px;padding:20px 28px;z-index:10000;
+        box-shadow:0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+        display:flex;align-items:center;gap:20px;min-width:340px;
+        animation: slideUpCall 0.3s ease;backdrop-filter:blur(20px);
+      `;
+      notif.innerHTML = `
+        <style>@keyframes slideUpCall{from{transform:translateX(-50%) translateY(100px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}</style>
+        <div style="width:50px;height:50px;border-radius:50%;background:rgba(34,197,94,0.2);display:flex;align-items:center;justify-content:center;font-size:1.5rem;animation:pulse-ring 2s infinite;">📞</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:1rem;">Входящий звонок</div>
+          <div style="font-size:0.85rem;opacity:0.7;">${callerName || 'Неизвестный'}</div>
+        </div>
+        <button id="acceptCallBtn" style="width:44px;height:44px;border-radius:50%;background:#22c55e;color:white;border:none;font-size:1.2rem;cursor:pointer;">📞</button>
+        <button id="rejectCallBtn" style="width:44px;height:44px;border-radius:50%;background:#ef4444;color:white;border:none;font-size:1.2rem;cursor:pointer;">✕</button>
+      `;
       document.body.appendChild(notif);
       document.getElementById('acceptCallBtn').onclick = async () => {
         notif.remove();
@@ -1423,7 +1476,10 @@
         if (doc.exists && doc.data().status === 'ringing') acceptIncomingCall(callDoc);
         else { alert('Звонок уже неактуален'); callDoc.ref.update({ status: 'ended' }).catch(() => {}); }
       };
-      document.getElementById('rejectCallBtn').onclick = () => { notif.remove(); callDoc.ref.update({ status: 'ended' }).catch(() => {}); };
+      document.getElementById('rejectCallBtn').onclick = () => { 
+        notif.remove(); 
+        callDoc.ref.update({ status: 'ended' }).catch(() => {}); 
+      };
     }
 
     function listenForIncomingCalls() {
@@ -1442,65 +1498,146 @@
       });
     }
 
-    async function createPeerConnection() {
-      peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+    window.startCall = async () => {
+      if (!currentChat || callInProgress) return;
+      if (currentChat.otherUser.isChannel || currentChat.otherUser.isGroup) { alert('📞 Звонки только в личных чатах'); return; }
+      const otherUserId = currentChat.otherUser.id;
+      if (!otherUserId) { alert('Ошибка: не удалось определить собеседника.'); return; }
       
-      peerConnection.ontrack = (event) => {
-        const remoteAudio = document.getElementById('remoteAudio');
-        if (remoteAudio && event.streams[0]) {
-          remoteAudio.srcObject = event.streams[0];
-          remoteAudio.play().catch(e => console.warn('Audio play failed:', e));
-        }
-      };
+      endCall();
       
-      peerConnection.onicecandidate = (event) => {
-        if (event.candidate && currentCallDocId) {
-          db.collection('calls').doc(currentCallDocId).update({ 
-            candidates: firebase.firestore.FieldValue.arrayUnion(JSON.stringify(event.candidate)) 
-          });
-        }
-      };
-      
-      peerConnection.onconnectionstatechange = () => {
-        const statusEl = document.getElementById('callStatus');
-        if (statusEl && peerConnection) {
-          statusEl.textContent = { 
-            'connecting':'Подключение...',
-            'connected':'✅ Соединение установлено',
-            'disconnected':'⚠️ Разрыв',
-            'failed':'❌ Ошибка',
-            'closed':'Завершён' 
-          }[peerConnection.connectionState] || '';
-        }
-        if (peerConnection && (peerConnection.connectionState==='failed'||peerConnection.connectionState==='closed')) endCall();
-      };
-
-      peerConnection.onnegotiationneeded = async () => {
-        try {
-          if (!currentCallDocId) return;
-          const offer = await peerConnection.createOffer();
-          await peerConnection.setLocalDescription(offer);
-          await db.collection('calls').doc(currentCallDocId).update({ 
-            offer: JSON.stringify(offer) 
-          });
-        } catch (e) {
-          console.warn('Negotiation failed:', e);
-        }
-      };
-    }
-
-    async function acceptIncomingCall(callDoc) {
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        callInProgress = true; 
-        currentCallDocId = callDoc.id;
-        const data = callDoc.data();
+        callInProgress = true;
         
-        await createPeerConnection();
+        peerConnection = new RTCPeerConnection({ 
+          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] 
+        });
         
         localStream.getTracks().forEach(track => {
           peerConnection.addTrack(track, localStream);
         });
+        
+        peerConnection.ontrack = (event) => {
+          const existingAudio = document.getElementById('remoteAudio');
+          if (existingAudio) existingAudio.remove();
+          
+          const audio = document.createElement('audio');
+          audio.id = 'remoteAudio';
+          audio.autoplay = true;
+          audio.playsinline = true;
+          audio.srcObject = event.streams[0];
+          audio.play().catch(e => {});
+          
+          const callModal = document.getElementById('callModal');
+          if (callModal) callModal.appendChild(audio);
+        };
+        
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate && currentCallDocId) {
+            db.collection('calls').doc(currentCallDocId).update({ 
+              candidates: firebase.firestore.FieldValue.arrayUnion(JSON.stringify(event.candidate)) 
+            });
+          }
+        };
+        
+        peerConnection.onconnectionstatechange = () => {
+          const statusEl = document.getElementById('callStatus');
+          if (statusEl) {
+            statusEl.textContent = {
+              'connecting': 'Подключение...',
+              'connected': '✅ Соединение установлено',
+              'disconnected': '⚠️ Разрыв',
+              'failed': '❌ Ошибка',
+              'closed': 'Завершён'
+            }[peerConnection.connectionState] || peerConnection.connectionState;
+          }
+          if (peerConnection.connectionState === 'failed' || peerConnection.connectionState === 'closed') {
+            endCall();
+          }
+        };
+        
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        
+        const callDocRef = db.collection('calls').doc();
+        currentCallDocId = callDocRef.id;
+        
+        await callDocRef.set({
+          chatId: currentChat.chatId,
+          participants: [currentUser.uid, otherUserId],
+          callerId: currentUser.uid,
+          status: 'ringing',
+          offer: JSON.stringify(offer),
+          answer: null,
+          candidates: [],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        listenCallDoc(callDocRef);
+        showCallUI();
+        
+      } catch (e) { 
+        alert('Ошибка: ' + e.message); 
+        endCall(); 
+      }
+    };
+
+    async function acceptIncomingCall(callDoc) {
+      try {
+        endCall();
+        
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        callInProgress = true;
+        currentCallDocId = callDoc.id;
+        const data = callDoc.data();
+        
+        peerConnection = new RTCPeerConnection({ 
+          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] 
+        });
+        
+        localStream.getTracks().forEach(track => {
+          peerConnection.addTrack(track, localStream);
+        });
+        
+        peerConnection.ontrack = (event) => {
+          const existingAudio = document.getElementById('remoteAudio');
+          if (existingAudio) existingAudio.remove();
+          
+          const audio = document.createElement('audio');
+          audio.id = 'remoteAudio';
+          audio.autoplay = true;
+          audio.playsinline = true;
+          audio.srcObject = event.streams[0];
+          audio.play().catch(e => {});
+          
+          const callModal = document.getElementById('callModal');
+          if (callModal) callModal.appendChild(audio);
+        };
+        
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate && currentCallDocId) {
+            db.collection('calls').doc(currentCallDocId).update({ 
+              candidates: firebase.firestore.FieldValue.arrayUnion(JSON.stringify(event.candidate)) 
+            });
+          }
+        };
+        
+        peerConnection.onconnectionstatechange = () => {
+          const statusEl = document.getElementById('callStatus');
+          if (statusEl) {
+            statusEl.textContent = {
+              'connecting': 'Подключение...',
+              'connected': '✅ Соединение установлено',
+              'disconnected': '⚠️ Разрыв',
+              'failed': '❌ Ошибка',
+              'closed': 'Завершён'
+            }[peerConnection.connectionState] || peerConnection.connectionState;
+          }
+          if (peerConnection.connectionState === 'failed' || peerConnection.connectionState === 'closed') {
+            endCall();
+          }
+        };
         
         await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.offer)));
         
@@ -1514,75 +1651,37 @@
         
         listenCallDoc(callDoc.ref);
         showCallUI();
+        
       } catch (e) { 
-        console.error('Accept call error:', e); 
         endCall(); 
       }
     }
-
-    window.startCall = async () => {
-      if (!currentChat || callInProgress) return;
-      if (currentChat.otherUser.isChannel || currentChat.otherUser.isGroup) { alert('📞 Звонки только в личных чатах'); return; }
-      const otherUserId = currentChat.otherUser.id;
-      if (!otherUserId) { alert('Ошибка: не удалось определить собеседника.'); return; }
-      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') { alert('❌ Только HTTPS'); return; }
-      if (peerConnection || localStream || currentCallDocId || callDocListener) endCall();
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        callInProgress = true;
-        const callDocRef = db.collection('calls').doc(); currentCallDocId = callDocRef.id;
-        await createPeerConnection();
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        await callDocRef.set({ chatId: currentChat.chatId, participants: [currentUser.uid, otherUserId], callerId: currentUser.uid, status: 'ringing', offer: JSON.stringify(offer), answer: null, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        listenCallDoc(callDocRef);
-        showCallUI();
-      } catch (e) { alert('Ошибка: '+e.message); endCall(); }
-    };
 
     function listenCallDoc(callDocRef) {
       if (callDocListener) callDocListener();
       
       callDocListener = callDocRef.onSnapshot(async (doc) => {
         if (!doc.exists) { endCall(); return; }
+        
         const data = doc.data();
         
         if (data.status === 'ended') { endCall(); return; }
         
         if (data.callerId === currentUser.uid && data.answer && peerConnection) {
           try {
-            const remoteDesc = new RTCSessionDescription(JSON.parse(data.answer));
-            if (peerConnection.signalingState !== 'stable') {
-              await peerConnection.setRemoteDescription(remoteDesc);
+            if (peerConnection.signalingState === 'have-local-offer') {
+              await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.answer)));
             }
-          } catch (e) { console.warn('Set remote answer error:', e); }
-        }
-        
-        if (data.callerId !== currentUser.uid && data.offer && peerConnection) {
-          try {
-            const remoteDesc = new RTCSessionDescription(JSON.parse(data.offer));
-            if (peerConnection.signalingState !== 'stable') {
-              await peerConnection.setRemoteDescription(remoteDesc);
-              const answer = await peerConnection.createAnswer();
-              await peerConnection.setLocalDescription(answer);
-              await callDocRef.update({ answer: JSON.stringify(answer) });
-            }
-          } catch (e) { console.warn('Set remote offer error:', e); }
+          } catch (e) {}
         }
         
         if (data.candidates && peerConnection) {
-          const currentCandidates = new Set();
-          for (const c of data.candidates) {
-            try {
-              const candidate = new RTCIceCandidate(JSON.parse(c));
-              const candidateStr = JSON.stringify(candidate);
-              if (!currentCandidates.has(candidateStr)) {
-                currentCandidates.add(candidateStr);
-                await peerConnection.addIceCandidate(candidate);
-              }
-            } catch (e) {
-              console.warn('ICE candidate error:', e);
+          const remoteDescription = peerConnection.remoteDescription;
+          if (remoteDescription) {
+            for (const c of data.candidates) {
+              try {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(c)));
+              } catch (e) {}
             }
           }
         }
@@ -1590,36 +1689,132 @@
     }
 
     window.endCall = () => {
-      if (currentCallDocId) db.collection('calls').doc(currentCallDocId).update({ status: 'ended' }).catch(() => {});
-      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-      if (peerConnection) { peerConnection.ontrack = null; peerConnection.onicecandidate = null; peerConnection.onconnectionstatechange = null; peerConnection.close(); peerConnection = null; }
-      if (callDocListener) { callDocListener(); callDocListener = null; }
-      callInProgress = false; currentCallDocId = null;
-      window._micMuted = false; window._speakerMuted = false;
+      if (currentCallDocId) {
+        db.collection('calls').doc(currentCallDocId).update({ status: 'ended' }).catch(() => {});
+      }
+      
+      if (localStream) { 
+        localStream.getTracks().forEach(t => t.stop()); 
+        localStream = null; 
+      }
+      
+      if (peerConnection) { 
+        peerConnection.ontrack = null; 
+        peerConnection.onicecandidate = null; 
+        peerConnection.onconnectionstatechange = null; 
+        peerConnection.close(); 
+        peerConnection = null; 
+      }
+      
+      if (callDocListener) { 
+        callDocListener(); 
+        callDocListener = null; 
+      }
+      
+      callInProgress = false; 
+      currentCallDocId = null;
+      window._micMuted = false; 
+      window._speakerMuted = false;
+      
       closeCallUI();
     };
 
     function showCallUI() {
-      const existing = document.getElementById('callModal'); if (existing) existing.remove();
-      const modal = document.createElement('div'); modal.id = 'callModal';
-      modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;';
-      modal.innerHTML = `<div style="font-size:2.5rem;font-weight:700;margin-bottom:12px;">🎤 Аудиозвонок</div><div style="font-size:1.3rem;margin-bottom:24px;">${currentChat?.otherUser?.displayName||'Собеседник'}</div><div id="callStatus" style="color:#aaa;margin-bottom:24px;font-size:1rem;">Соединение...</div><audio id="remoteAudio" autoplay playsinline style="display:none;"></audio><div style="display:flex;gap:24px;"><button id="muteMicBtn" onclick="toggleMic()" style="width:64px;height:64px;border-radius:50%;background:#444;color:#fff;border:none;font-size:1.6rem;cursor:pointer;">🎙️</button><button onclick="window.endCall()" style="width:72px;height:72px;border-radius:50%;background:#ef4444;color:#fff;border:none;font-size:2.2rem;cursor:pointer;">📞</button><button id="muteSpeakerBtn" onclick="toggleSpeaker()" style="width:64px;height:64px;border-radius:50%;background:#444;color:#fff;border:none;font-size:1.6rem;cursor:pointer;">🔊</button></div>`;
+      closeCallUI();
+      
+      const userName = currentChat?.otherUser?.displayName || 'Собеседник';
+      const userAvatar = currentChat?.otherUser?.photoURL || '';
+      const userGroupAvatar = currentChat?.otherUser?.groupAvatar || '';
+      const avatarUrl = userAvatar || userGroupAvatar || '';
+      
+      const modal = document.createElement('div');
+      modal.id = 'callModal';
+      modal.className = 'call-modal';
+      modal.innerHTML = `
+        <div class="call-waves">
+          <div class="call-wave"></div>
+          <div class="call-wave"></div>
+        </div>
+        <div class="call-avatar-ring">
+          ${avatarUrl ? `<img src="${avatarUrl}" alt="${userName}">` : userName.charAt(0).toUpperCase()}
+        </div>
+        <div class="call-name">${userName}</div>
+        <div class="call-status" id="callStatus">Подключение...</div>
+        <div class="call-timer" id="callTimer" style="display:none;">00:00</div>
+        <div class="call-actions">
+          <button class="call-btn-circle call-btn-mute" id="muteMicBtn" onclick="toggleMic()">🎙️</button>
+          <button class="call-btn-circle call-btn-end" onclick="window.endCall()">📞</button>
+          <button class="call-btn-circle call-btn-speaker" id="muteSpeakerBtn" onclick="toggleSpeaker()">🔊</button>
+        </div>
+      `;
       document.body.appendChild(modal);
+      
+      window._callStartTime = Date.now();
+      window._callTimerInterval = setInterval(updateCallTimer, 1000);
+    }
+
+    function updateCallTimer() {
+      const timer = document.getElementById('callTimer');
+      const status = document.getElementById('callStatus');
+      if (!timer || !status) return;
+      
+      const elapsed = Math.floor((Date.now() - window._callStartTime) / 1000);
+      const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+      const secs = (elapsed % 60).toString().padStart(2, '0');
+      
+      if (peerConnection && peerConnection.connectionState === 'connected') {
+        timer.style.display = 'block';
+        status.style.display = 'none';
+        timer.textContent = `${mins}:${secs}`;
+      }
     }
 
     window.toggleMic = () => {
       window._micMuted = !window._micMuted;
       if (localStream) localStream.getAudioTracks().forEach(track => { track.enabled = !window._micMuted; });
-      const btn = document.getElementById('muteMicBtn'); if (btn) btn.innerHTML = window._micMuted ? '🔇' : '🎙️';
+      const btn = document.getElementById('muteMicBtn'); 
+      if (btn) {
+        if (window._micMuted) {
+          btn.classList.add('muted');
+          btn.textContent = '🔇';
+        } else {
+          btn.classList.remove('muted');
+          btn.textContent = '🎙️';
+        }
+      }
     };
+    
     window.toggleSpeaker = () => {
       window._speakerMuted = !window._speakerMuted;
-      const audio = document.getElementById('remoteAudio'); if (audio) audio.muted = window._speakerMuted;
-      const btn = document.getElementById('muteSpeakerBtn'); if (btn) btn.innerHTML = window._speakerMuted ? '🔇' : '🔊';
+      const audio = document.getElementById('remoteAudio'); 
+      if (audio) audio.muted = window._speakerMuted;
+      const btn = document.getElementById('muteSpeakerBtn'); 
+      if (btn) {
+        if (window._speakerMuted) {
+          btn.classList.add('muted');
+          btn.textContent = '🔇';
+        } else {
+          btn.classList.remove('muted');
+          btn.textContent = '🔊';
+        }
+      }
     };
-    function closeCallUI() { const modal = document.getElementById('callModal'); if (modal) modal.remove(); const notif = document.getElementById('incomingCallNotification'); if (notif) notif.remove(); }
+    
+    function closeCallUI() { 
+      const modal = document.getElementById('callModal'); 
+      if (modal) modal.remove(); 
+      const notif = document.getElementById('incomingCallNotification'); 
+      if (notif) notif.remove();
+      const audio = document.getElementById('remoteAudio');
+      if (audio) audio.remove();
+      if (window._callTimerInterval) {
+        clearInterval(window._callTimerInterval);
+        window._callTimerInterval = null;
+      }
+      window._callStartTime = null;
+    }
 
-    console.log('✅ Мессенджер готов. 8 тем, все функции работают, звонки исправлены, тема Андертейл с сердечками добавлена.');
+    console.log('✅ Мессенджер готов. 8 тем, красивое меню звонка, тема Андертейл с сердечками.');
   </script>
 </body>
 </html>
