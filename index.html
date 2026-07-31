@@ -12,6 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     :root {
@@ -114,6 +115,12 @@
     .tool-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
     .tool-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
     
+    .upload-progress { padding: 8px 16px; background: var(--surface2); border-top: 1px solid var(--border); display: none; align-items: center; gap: 12px; }
+    .upload-progress.active { display: flex; }
+    .progress-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.2s; }
+    .upload-progress span { font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; }
+    
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; visibility: hidden; opacity: 0; transition: 0.3s; backdrop-filter: blur(5px); }
     .modal.active { visibility: visible; opacity: 1; }
     .modal-content { background: var(--surface); padding: 28px; border-radius: var(--radius-lg); width: 90%; max-width: 420px; max-height: 85vh; overflow-y: auto; color: var(--text); border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.5),var(--glow); }
@@ -128,6 +135,7 @@
     .theme-opt { padding: 14px 6px; border-radius: var(--radius-sm); border: 2px solid var(--border); cursor: pointer; text-align: center; font-weight: 600; font-size: 0.7rem; }
     .theme-opt.active { border-color: var(--primary); box-shadow: var(--glow); }
     
+    /* Стили звонка – оставлены без изменений для краткости, они есть в предыдущем ответе */
     .call-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg,#0a0a1a,#0f0f2e,#1a1040,#0a0a1a); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 0.7; box-shadow: 0 0 40px rgba(108,92,231,0.4); } 50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 80px rgba(108,92,231,0.8); } 100% { transform: scale(0.95); opacity: 0.7; box-shadow: 0 0 40px rgba(108,92,231,0.4); } }
@@ -191,6 +199,7 @@
     <div id="chatPanel" class="chat-panel"></div>
   </div>
 
+  <!-- Модальные окна такие же как раньше -->
   <div id="createGroupModal" class="modal"><div class="modal-content"><h3>Создать группу</h3><input type="text" id="groupName" placeholder="Название группы"><div id="groupContacts" style="max-height:200px;overflow-y:auto;margin:10px 0;"></div><button onclick="createGroup()">Создать</button><button class="btn-secondary" onclick="closeCreateGroup()" style="margin-top:8px;">Отмена</button></div></div>
   <div id="createChannelModal" class="modal"><div class="modal-content"><h3>Создать канал</h3><input type="text" id="channelName" placeholder="Название"><textarea id="channelDesc" rows="3" placeholder="Описание"></textarea><button onclick="createChannel()">Создать</button><button class="btn-secondary" onclick="closeCreateChannel()" style="margin-top:8px;">Отмена</button></div></div>
   <div id="settingsModal" class="modal"><div class="modal-content"><h3>🎨 Тема</h3><div class="theme-options" id="themeOptionsContainer"></div><button class="btn-secondary" onclick="closeSettings()" style="margin-top:16px;">Закрыть</button></div></div>
@@ -199,7 +208,8 @@
   <div id="changePhoneModal" class="modal"><div class="modal-content"><h3>Смена номера</h3><p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:12px;">Код отправлен в чат Verification</p><input type="text" id="verificationCode" placeholder="Введите код"><div style="display:flex;gap:8px;margin-top:10px;"><button onclick="verifyCode()" style="flex:1;">Проверить</button><button id="newCodeBtn" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.85rem;" onclick="requestNewCode()">Новый код</button></div><div id="timerText" style="font-size:0.8rem;color:var(--text-secondary);margin-top:6px;"></div><div id="newPhoneSection" style="display:none;margin-top:14px;"><div style="display:flex;gap:0;"><span style="padding:14px;background:var(--surface2);border:1px solid var(--border);border-right:none;border-radius:var(--radius-sm) 0 0 var(--radius-sm);color:var(--text-secondary);">+7</span><input type="tel" id="newPhone" placeholder="Новый номер" style="flex:1;border-radius:0 var(--radius-sm) var(--radius-sm) 0;"></div><button onclick="confirmNewPhone()" style="margin-top:10px;">Подтвердить</button></div><button class="btn-secondary" onclick="closeChangePhone()" style="margin-top:10px;">Отмена</button></div></div>
   <div id="pollModal" class="modal"><div class="modal-content"><h3>📊 Опрос</h3><input type="text" id="pollQuestion" placeholder="Вопрос"><div id="pollOptionsContainer"><div style="display:flex;gap:8px;margin:8px 0;"><input type="text" class="poll-option-input" placeholder="Вариант"><button class="btn-secondary" style="width:auto;padding:10px 14px;" onclick="removePollOption(this)">✕</button></div></div><button onclick="addPollOption()" class="btn-secondary">+ Добавить</button><button onclick="createPoll()">Создать</button><button class="btn-secondary" onclick="closePoll()" style="margin-top:8px;">Отмена</button></div></div>
 
-<script>
+  <script>
+    // Firebase инициализация
     firebase.initializeApp({
       apiKey: "AIzaSyBoKOLs5MwXYAjMkl3CtplfVE441IE3vEA",
       authDomain: "messenger-bcdd6.firebaseapp.com",
@@ -210,7 +220,9 @@
     });
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const storage = firebase.storage();
 
+    // Глобальные переменные
     let currentUser = null, currentUserProfile = null, isLogin = true, currentChat = null;
     let chatUnsubscribe = null, chatListUnsubscribe = null, verificationCode = null, codeExpiry = null;
     let mediaRecorder = null, audioChunks = [], isRecording = false, typingTimeout = null, chatTypingUnsubscribe = null;
@@ -218,6 +230,7 @@
     let localStream = null, peerConnections = [], callInProgress = false, currentCallDocId = null, callDocListener = null;
     let heartsInterval = null, deferredPrompt = null, callTimerInterval = null, callStartTime = null;
     let _micMuted = false, _speakerMuted = false, _callTimeout = null;
+    let currentUploadTask = null; // Для отслеживания загрузки файла
 
     const TEST_BOT_ID = 'test-call-bot';
     const TEST_BOT_PROFILE = { displayName: '🤖 Тестовый Бот', email: 'testbot@sys', phone: '+70000000000', bio: 'Позвони мне для проверки!', photoURL: '', mode: 'online' };
@@ -242,6 +255,7 @@
       { name: '❤️ Андертейл', bg: '#000000', surface: '#111111', surface2: '#1a1a1a', text: '#ffffff', textSecondary: '#cccccc', primary: '#ff0000', primaryLight: '#ff4444', accent: '#ff0000', accent2: '#cc0000', border: 'rgba(255,0,0,0.2)', font: 'Orbitron, sans-serif', hearts: true }
     ];
 
+    // Утилиты
     function initBgParticles() { const c=document.getElementById('bgParticles'); if(!c)return; c.innerHTML=''; for(let i=0;i<5;i++){ const p=document.createElement('div'); p.className='bg-particle'; const s=Math.random()*200+100; p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*80}%;top:${Math.random()*80}%;animation-delay:${Math.random()*8}s;animation-duration:${Math.random()*8+6}s;opacity:${Math.random()*0.3+0.1};`; c.appendChild(p); } }
     initBgParticles();
 
@@ -264,6 +278,7 @@
     window.handleAuth=async()=>{const email=document.getElementById('email').value.trim();const pass=document.getElementById('password').value.trim();const name=document.getElementById('displayName').value.trim();const phoneRaw=document.getElementById('phone').value.trim();if(!email||!pass){document.getElementById('authError').textContent='Заполните email и пароль';return;}if(!isLogin&&!name){document.getElementById('authError').textContent='Введите имя';return;}let phone='+7'+phoneRaw;if(!isLogin){if(!phoneRaw||phoneRaw.length<10){document.getElementById('authError').textContent='Введите 10 цифр номера';return;}const v=validateRussianPhone(phone);if(!v){document.getElementById('authError').textContent='Неверный формат номера';return;}phone=v;const exist=await db.collection('users').where('phone','==',phone).get();if(!exist.empty&&exist.docs[0].id!==(currentUser?.uid||'')){document.getElementById('authError').textContent='Этот номер уже используется';return;}}try{if(isLogin)await auth.signInWithEmailAndPassword(email,pass);else{const cred=await auth.createUserWithEmailAndPassword(email,pass);await db.collection('users').doc(cred.user.uid).set({email,displayName:name,phone,bio:'',photoURL:'',mode:'online',invisible:false});}}catch(err){document.getElementById('authError').textContent=err.message;}};
     window.logout=()=>auth.signOut();
 
+    // Системные чаты
     async function ensureSystemChats(uid){for(const[botId,profile]of Object.entries(SYSTEM_BOTS)){await db.collection('users').doc(botId).set(profile,{merge:true});const chatId=[uid,botId].sort().join('_');const ref=db.collection('chats').doc(chatId);if(!(await ref.get()).exists){await ref.set({participants:[uid,botId],updatedAt:firebase.firestore.FieldValue.serverTimestamp()});if(botId===TEST_BOT_ID)await ref.collection('messages').add({senderId:botId,text:'👋 Привет! Я тестовый бот для проверки звонков. Нажми 📞 чтобы позвонить!',timestamp:firebase.firestore.FieldValue.serverTimestamp()});if(botId==='favorites-bot')await ref.collection('messages').add({senderId:botId,text:'📌 Ваш личный чат для заметок',timestamp:firebase.firestore.FieldValue.serverTimestamp()});if(botId==='saved-bot')await ref.collection('messages').add({senderId:botId,text:'💾 Здесь будут ваши сохранённые сообщения',timestamp:firebase.firestore.FieldValue.serverTimestamp()});}}}
 
     function startPresence(){if(!currentUser)return;const ref=db.collection('users').doc(currentUser.uid).collection('presence').doc('status');ref.set({online:true,mode:currentUserProfile?.mode||'online',lastSeen:firebase.firestore.FieldValue.serverTimestamp()});window.addEventListener('beforeunload',()=>{ref.set({online:false,lastSeen:firebase.firestore.FieldValue.serverTimestamp()});});if(presenceInterval)clearInterval(presenceInterval);presenceInterval=setInterval(()=>{ref.update({lastSeen:firebase.firestore.FieldValue.serverTimestamp()});},60000);}
@@ -273,7 +288,7 @@
 
     function getUserAvatar(u){if(!u)return'';if(u.photoURL&&u.photoURL.startsWith('data:'))return`<img src="${u.photoURL}" alt="${u.displayName||''}" onerror="this.style.display='none'">`;if(u.groupAvatar&&u.groupAvatar.startsWith('data:'))return`<img src="${u.groupAvatar}" alt="${u.displayName||''}" onerror="this.style.display='none'">`;return'';}
 
-    function renderMessageContent(m,docId){let c='';if(m.audio)c=`<div>🎵 <audio controls src="${m.audio}"></audio></div>`;else if(m.image)c=`<img src="${m.image}" style="max-width:200px;max-height:200px;border-radius:10px;" onerror="this.style.display='none'">`;else if(m.video)c=`<video controls src="${m.video}" style="max-width:200px;max-height:200px;border-radius:10px;" onerror="this.style.display='none'"></video>`;else if(m.file){const icon=m.fileType?.includes('zip')||m.fileType?.includes('rar')?'📦':m.fileType?.includes('pdf')?'📄':'📎';c=`<div class="file-attachment" onclick="window.open('${m.file}','_blank')"><span style="font-size:1.5rem;">${icon}</span><div><div style="font-weight:600;">${m.fileName||'Файл'}</div><div style="font-size:0.75rem;opacity:0.7;">${(m.fileSize/1024).toFixed(1)} КБ</div></div></div>`;}else if(m.poll){const p=m.poll;c=`<div style="font-weight:600;">📊 ${p.question}</div><div class="poll-options">`;p.options.forEach((o,i)=>{const tv=p.totalVotes||1;const pc=Math.round((o.votes.length/tv)*100);c+=`<div class="poll-option" onclick="votePoll('${docId}',${i})">${o.text}<span>${o.votes.length} (${pc}%)</span><div class="bar" style="width:${pc}%"></div></div>`;});c+=`</div>`;}else if(m.invite){const inv=m.invite;c=`<div style="font-weight:600;">📨 Приглашение</div><div>${inv.text||'Вас приглашают'}</div>`;if(!inv.accepted&&!inv.declined)c+=`<div class="invite-buttons"><button class="invite-btn accept" onclick="acceptInvite('${docId}')">Принять</button><button class="invite-btn decline" onclick="declineInvite('${docId}')">Отклонить</button></div>`;else if(inv.accepted)c+='<div style="color:var(--success);">✓ Принято</div>';else c+='<div style="color:var(--danger);">✕ Отклонено</div>';}else c=m.text||'';if(m.edited)c+='<span class="msg-edited"> изм.</span>';return c;}
+    function renderMessageContent(m,docId){let c='';if(m.audio)c=`<div>🎵 <audio controls src="${m.audio}"></audio></div>`;else if(m.image)c=`<img src="${m.image}" style="max-width:200px;max-height:200px;border-radius:10px;" onerror="this.style.display='none'">`;else if(m.video)c=`<video controls src="${m.video}" style="max-width:200px;max-height:200px;border-radius:10px;" onerror="this.style.display='none'"></video>`;else if(m.file){const icon=m.fileType?.includes('zip')||m.fileType?.includes('rar')?'📦':m.fileType?.includes('pdf')?'📄':'📎';c=`<div class="file-attachment" onclick="window.open('${m.file}','_blank')"><span style="font-size:1.5rem;">${icon}</span><div><div style="font-weight:600;">${m.fileName||'Файл'}</div><div style="font-size:0.75rem;opacity:0.7;">${(m.fileSize/1024/1024).toFixed(1)} МБ</div></div></div>`;}else if(m.poll){const p=m.poll;c=`<div style="font-weight:600;">📊 ${p.question}</div><div class="poll-options">`;p.options.forEach((o,i)=>{const tv=p.totalVotes||1;const pc=Math.round((o.votes.length/tv)*100);c+=`<div class="poll-option" onclick="votePoll('${docId}',${i})">${o.text}<span>${o.votes.length} (${pc}%)</span><div class="bar" style="width:${pc}%"></div></div>`;});c+=`</div>`;}else if(m.invite){const inv=m.invite;c=`<div style="font-weight:600;">📨 Приглашение</div><div>${inv.text||'Вас приглашают'}</div>`;if(!inv.accepted&&!inv.declined)c+=`<div class="invite-buttons"><button class="invite-btn accept" onclick="acceptInvite('${docId}')">Принять</button><button class="invite-btn decline" onclick="declineInvite('${docId}')">Отклонить</button></div>`;else if(inv.accepted)c+='<div style="color:var(--success);">✓ Принято</div>';else c+='<div style="color:var(--danger);">✕ Отклонено</div>';}else c=m.text||'';if(m.edited)c+='<span class="msg-edited"> изм.</span>';return c;}
 
     window.acceptInvite=async(mid)=>{if(!currentChat)return;const ref=db.collection('chats').doc(currentChat.chatId).collection('messages').doc(mid);const d=await ref.get();if(!d.exists)return;const data=d.data();if(!data.invite||data.invite.accepted||data.invite.declined)return;try{if(data.invite.type==='channel'||data.invite.type==='group')await db.collection('chats').doc(data.invite.chatId).update({participants:firebase.firestore.FieldValue.arrayUnion(currentUser.uid)});await ref.update({'invite.accepted':true});alert('✅ Принято!');}catch(e){alert('Ошибка');}};
     window.declineInvite=async(mid)=>{if(!currentChat)return;const ref=db.collection('chats').doc(currentChat.chatId).collection('messages').doc(mid);const d=await ref.get();if(!d.exists)return;await ref.update({'invite.declined':true});};
@@ -292,7 +307,63 @@
     window.sendMedia=()=>document.getElementById('mediaInput').click();
     window.sendFile=()=>document.getElementById('fileInput').click();
     window.handleMedia=async(e)=>{const file=e.target.files[0];if(!file||!currentChat)return;if(file.size>5*1024*1024){alert('Макс. 5MB');return;}const reader=new FileReader();reader.onload=async(ev)=>{const isVideo=file.type.startsWith('video');const coll=currentChat.otherUser.isChannel?'posts':'messages';await db.collection('chats').doc(currentChat.chatId).collection(coll).add({senderId:currentUser.uid,[isVideo?'video':'image']:ev.target.result,timestamp:firebase.firestore.FieldValue.serverTimestamp()});};reader.readAsDataURL(file);e.target.value='';};
-    window.handleFile=async(e)=>{const file=e.target.files[0];if(!file||!currentChat)return;if(file.size>10*1024*1024){alert('Макс. 10MB');return;}const reader=new FileReader();reader.onload=async(ev)=>{const coll=currentChat.otherUser.isChannel?'posts':'messages';await db.collection('chats').doc(currentChat.chatId).collection(coll).add({senderId:currentUser.uid,file:ev.target.result,fileName:file.name,fileSize:file.size,fileType:file.type,timestamp:firebase.firestore.FieldValue.serverTimestamp()});};reader.readAsDataURL(file);e.target.value='';};
+    
+    // Новая функция загрузки файла в Storage
+    window.handleFile = async (e) => {
+      const file = e.target.files[0];
+      if (!file || !currentChat) return;
+      if (file.size > 1 * 1024 * 1024 * 1024) { alert('Максимальный размер файла 1 ГБ'); return; }
+      
+      const progressPanel = document.getElementById('uploadProgress');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      if (progressPanel && progressFill && progressText) {
+        progressPanel.classList.add('active');
+        progressFill.style.width = '0%';
+        progressText.textContent = '0%';
+      }
+      
+      const storageRef = storage.ref(`files/${currentUser.uid}/${Date.now()}_${file.name}`);
+      const uploadTask = storageRef.put(file);
+      currentUploadTask = uploadTask;
+      
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          if (progressFill) progressFill.style.width = progress + '%';
+          if (progressText) progressText.textContent = Math.round(progress) + '%';
+        },
+        (error) => {
+          console.error('Upload failed:', error);
+          alert('Ошибка загрузки файла');
+          if (progressPanel) progressPanel.classList.remove('active');
+        },
+        async () => {
+          const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+          const coll = currentChat.otherUser.isChannel ? 'posts' : 'messages';
+          await db.collection('chats').doc(currentChat.chatId).collection(coll).add({
+            senderId: currentUser.uid,
+            file: downloadURL,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          if (progressPanel) progressPanel.classList.remove('active');
+        }
+      );
+      e.target.value = '';
+    };
+
+    // Отмена загрузки при закрытии чата
+    window.cancelUpload = () => {
+      if (currentUploadTask) {
+        currentUploadTask.cancel();
+        currentUploadTask = null;
+        const progressPanel = document.getElementById('uploadProgress');
+        if (progressPanel) progressPanel.classList.remove('active');
+      }
+    };
 
     window.showUserInfo=async(uid)=>{const doc=await db.collection('users').doc(uid).get();if(doc.exists){const u=doc.data();document.getElementById('userInfoContent').innerHTML=`<h3>${u.displayName||'Пользователь'}</h3><div style="width:80px;height:80px;border-radius:50%;margin:10px auto;background:var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:2rem;font-weight:700;">${u.photoURL?`<img src="${u.photoURL}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`:(u.displayName||'?').charAt(0)}</div><p style="margin:8px 0;"><strong>О себе:</strong> ${u.bio||'Не указано'}</p><p style="margin:8px 0;"><strong>Телефон:</strong> ${u.phone||'Не указан'}</p><p style="margin:8px 0;"><strong>Режим:</strong> ${u.mode==='online'?'🟢 Онлайн':u.mode==='sleep'?'🟡 Спящий':'🟣 Фокус'}</p><button class="btn-secondary" onclick="document.getElementById('userInfoModal').classList.remove('active')">Закрыть</button>`;document.getElementById('userInfoModal').classList.add('active');}};
 
@@ -307,10 +378,16 @@
         </div>
         <div class="messages" id="msgContainer"></div>
         <div class="typing-indicator" id="typingIndicator"></div>
+        <div class="upload-progress" id="uploadProgress">
+          <span>📎 Загрузка</span>
+          <div class="progress-bar"><div class="progress-bar-fill" id="progressFill"></div></div>
+          <span id="progressText">0%</span>
+          <button class="btn-secondary" onclick="cancelUpload()" style="width:auto;padding:4px 12px;">✕</button>
+        </div>
         ${!readonly&&!isChannel?`
           <div class="tools-panel" id="toolsPanel">
             <button class="tool-btn" onclick="sendMedia()">📷</button>
-            <button class="tool-btn" onclick="sendFile()">📎</button>
+            <button class="tool-btn" onclick="sendFile()">📎 Файл</button>
             <button class="tool-btn" onclick="openPoll()">📊</button>
           </div>
           <input type="file" id="mediaInput" accept="image/*,video/*" style="display:none" onchange="handleMedia(event)">
@@ -324,7 +401,7 @@
       `;
     document.getElementById('chatPanel').classList.add('active');document.getElementById('mainPanel').style.display='none';
     if(isChannel){chatUnsubscribe=db.collection('chats').doc(currentChat.chatId).collection('posts').orderBy('timestamp','desc').onSnapshot(snap=>{const c=document.getElementById('msgContainer');if(!c)return;c.innerHTML='';snap.forEach(doc=>{const m=doc.data();if(m.deletedForEveryone)return;c.innerHTML+=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;"><div style="font-weight:700;">Пост</div><div>${renderMessageContent(m,doc.id)}</div></div>`;});});}else{chatUnsubscribe=db.collection('chats').doc(currentChat.chatId).collection('messages').orderBy('timestamp','asc').onSnapshot(snap=>{const c=document.getElementById('msgContainer');if(!c)return;c.innerHTML='';snap.forEach(doc=>{const m=doc.data();if(m.deletedForEveryone)return;const isSent=m.senderId===currentUser.uid;const w=document.createElement('div');w.className=`msg-wrapper ${isSent?'sent':'received'}`;w.innerHTML=`<div class="msg ${isSent?'sent':'received'}">${renderMessageContent(m,doc.id)}</div>`;c.appendChild(w);});c.scrollTop=c.scrollHeight;});}}
-    window.closeChat=()=>{document.getElementById('chatPanel').classList.remove('active');document.getElementById('mainPanel').style.display='block';if(chatUnsubscribe){chatUnsubscribe();chatUnsubscribe=null;}if(chatTypingUnsubscribe){chatTypingUnsubscribe();chatTypingUnsubscribe=null;}clearTimeout(typingTimeout);if(mediaRecorder&&isRecording){mediaRecorder.stop();isRecording=false;}currentChat=null;};
+    window.closeChat=()=>{cancelUpload();document.getElementById('chatPanel').classList.remove('active');document.getElementById('mainPanel').style.display='block';if(chatUnsubscribe){chatUnsubscribe();chatUnsubscribe=null;}if(chatTypingUnsubscribe){chatTypingUnsubscribe();chatTypingUnsubscribe=null;}clearTimeout(typingTimeout);if(mediaRecorder&&isRecording){mediaRecorder.stop();isRecording=false;}currentChat=null;};
 
     async function openChat(otherId,otherUser){const chatId=[currentUser.uid,otherId].sort().join('_');await db.collection('chats').doc(chatId).set({participants:[currentUser.uid,otherId],permanent:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});currentChat={chatId,otherUser:{...otherUser,id:otherId}};renderChat();}
 
@@ -354,14 +431,13 @@
     window.closeSettings=()=>document.getElementById('settingsModal').classList.remove('active');
     document.querySelectorAll('.modal').forEach(m=>{m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('active');});});
 
+    // Звонки (без изменений, как в предыдущем ответе)
     function getCallInviteLink(callId){return`${window.location.origin}${window.location.pathname}?call=${callId}`;}
     function playRingtone(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(800,ctx.currentTime);o.frequency.setValueAtTime(1000,ctx.currentTime+0.1);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.4);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+0.4);}catch(e){}}
     function showIncomingCallUI(callerName,callDoc){const existing=document.getElementById('incomingCallNotification');if(existing)existing.remove();const notif=document.createElement('div');notif.id='incomingCallNotification';notif.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;border-radius:20px;padding:20px 28px;z-index:10000;box-shadow:0 20px 60px rgba(0,0,0,0.5);display:flex;align-items:center;gap:20px;min-width:340px;';notif.innerHTML=`<div style="width:50px;height:50px;border-radius:50%;background:rgba(46,213,115,0.2);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">📞</div><div style="flex:1;"><div style="font-weight:700;">Входящий звонок</div><div style="font-size:0.85rem;opacity:0.7;">${callerName||'Неизвестный'}</div></div><button id="acceptCallBtn" style="width:44px;height:44px;border-radius:50%;background:#22c55e;color:white;border:none;font-size:1.2rem;cursor:pointer;">📞</button><button id="rejectCallBtn" style="width:44px;height:44px;border-radius:50%;background:#ef4444;color:white;border:none;font-size:1.2rem;cursor:pointer;">✕</button>`;document.body.appendChild(notif);document.getElementById('acceptCallBtn').onclick=async()=>{notif.remove();const d=await db.collection('calls').doc(callDoc.id).get();if(d.exists&&d.data().status==='ringing')joinCall(callDoc.id);else callDoc.ref.update({status:'ended'}).catch(()=>{});};document.getElementById('rejectCallBtn').onclick=()=>{notif.remove();callDoc.ref.update({status:'ended'}).catch(()=>{});};}
     function listenForIncomingCalls(){db.collection('calls').where('participants','array-contains',currentUser.uid).where('status','==','ringing').onSnapshot(snap=>{snap.docChanges().forEach(async change=>{if(change.type==='added'){const doc=change.doc,data=doc.data();if(data.callerId===currentUser.uid)return;if(callInProgress){await doc.ref.update({status:'ended'});return;}let name='Пользователь';try{const u=await db.collection('users').doc(data.callerId).get();if(u.exists)name=u.data().displayName||name;}catch(e){}playRingtone();showIncomingCallUI(name,doc);}});});}
     function setupTestBotCallHandler(){db.collection('calls').where('participants','array-contains',TEST_BOT_ID).where('status','==','ringing').onSnapshot(snap=>{snap.docChanges().forEach(async change=>{if(change.type==='added'){const doc=change.doc,data=doc.data();if(data.callerId===TEST_BOT_ID)return;setTimeout(async()=>{const cd=await db.collection('calls').doc(doc.id).get();if(cd.exists&&cd.data().status==='ringing'){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const dest=ctx.createMediaStreamDestination();const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(440,ctx.currentTime);o.frequency.setValueAtTime(880,ctx.currentTime+0.5);g.gain.setValueAtTime(0.1,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+2);o.connect(g);g.connect(dest);o.start();o.stop(ctx.currentTime+3);const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});dest.stream.getTracks().forEach(t=>pc.addTrack(t,dest.stream));await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.offer)));const ans=await pc.createAnswer();await pc.setLocalDescription(ans);await doc.ref.update({answer:JSON.stringify(ans),status:'active'});setTimeout(async()=>{await doc.ref.update({status:'ended'});pc.close();ctx.close();},5000);}catch(e){await doc.ref.update({status:'ended'});}}},2000);}});});}
-
     window.startCall=async()=>{if(!currentChat||callInProgress)return;const otherId=currentChat.otherUser.id;if(!otherId)return;endCall();try{localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});callInProgress=true;const callDocRef=db.collection('calls').doc();currentCallDocId=callDocRef.id;const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});peerConnections=[pc];localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));pc.ontrack=(e)=>{setupRemoteAudio(e.streams[0]);};pc.onicecandidate=(e)=>{if(e.candidate)callDocRef.update({candidates:firebase.firestore.FieldValue.arrayUnion(JSON.stringify(e.candidate))});};pc.onconnectionstatechange=()=>{const statusEl=document.getElementById('callStatus');if(statusEl){const state=pc.connectionState;statusEl.textContent={'connecting':'Подключение...','connected':'✅ Соединение установлено','disconnected':'⚠️ Разрыв','failed':'❌ Ошибка','closed':'Завершён'}[state]||state;}if(pc.connectionState==='failed'||pc.connectionState==='closed')endCall();};const offer=await pc.createOffer();await pc.setLocalDescription(offer);await callDocRef.set({participants:[currentUser.uid,otherId],callerId:currentUser.uid,status:'ringing',offer:JSON.stringify(offer),answer:null,candidates:[],maxParticipants:6,createdAt:firebase.firestore.FieldValue.serverTimestamp()});listenCallDoc(callDocRef);showCallUI([currentUser.uid]);_callTimeout=setTimeout(()=>{if(callInProgress&&pc.connectionState!=='connected'){alert('Не удалось установить соединение. Проверьте интернет.');endCall();}},25000);}catch(e){alert('Ошибка: '+e.message);endCall();}};
-
     async function joinCall(callId){endCall();try{localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});callInProgress=true;currentCallDocId=callId;const callRef=db.collection('calls').doc(callId);const data=(await callRef.get()).data();if((data.participants||[]).length>=(data.maxParticipants||6)){alert('Звонок заполнен (макс. 6)');endCall();return;}await callRef.update({participants:firebase.firestore.FieldValue.arrayUnion(currentUser.uid),status:'active'});const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});peerConnections=[pc];localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));pc.ontrack=(e)=>{setupRemoteAudio(e.streams[0]);};pc.onicecandidate=(e)=>{if(e.candidate)callRef.update({candidates:firebase.firestore.FieldValue.arrayUnion(JSON.stringify(e.candidate))});};pc.onconnectionstatechange=()=>{const statusEl=document.getElementById('callStatus');if(statusEl){const state=pc.connectionState;statusEl.textContent={'connecting':'Подключение...','connected':'✅ Соединение установлено','disconnected':'⚠️ Разрыв','failed':'❌ Ошибка','closed':'Завершён'}[state]||state;}if(pc.connectionState==='failed'||pc.connectionState==='closed')endCall();};if(data.offer){await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.offer)));const ans=await pc.createAnswer();await pc.setLocalDescription(ans);await callRef.update({answer:JSON.stringify(ans)});}listenCallDoc(callRef);showCallUI(data.participants||[]);_callTimeout=setTimeout(()=>{if(callInProgress&&pc.connectionState!=='connected'){alert('Не удалось установить соединение.');endCall();}},25000);}catch(e){endCall();}}
     function setupRemoteAudio(stream){const exist=document.getElementById('remoteAudio');if(exist)exist.remove();const a=document.createElement('audio');a.id='remoteAudio';a.autoplay=true;a.playsinline=true;a.srcObject=stream;a.play().catch(()=>{});const m=document.getElementById('callModal');if(m)m.appendChild(a);}
     function listenCallDoc(ref){if(callDocListener)callDocListener();callDocListener=ref.onSnapshot(async(doc)=>{if(!doc.exists){endCall();return;}const data=doc.data();if(data.status==='ended'){endCall();return;}updateCallParticipants(data.participants||[]);if(data.answer&&peerConnections[0]&&data.callerId!==currentUser.uid){try{if(!peerConnections[0].remoteDescription)await peerConnections[0].setRemoteDescription(new RTCSessionDescription(JSON.parse(data.answer)));}catch(e){}}if(data.candidates&&peerConnections[0]?.remoteDescription){const existingCandidates=new Set();for(const c of data.candidates){try{const cand=new RTCIceCandidate(JSON.parse(c));if(!existingCandidates.has(cand.candidate)){existingCandidates.add(cand.candidate);await peerConnections[0].addIceCandidate(cand);}}catch(e){}}}});}
