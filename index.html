@@ -12,6 +12,9 @@
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     :root { --bg: #f0f2f5; --surface: #ffffff; --text: #1a1a1a; --text-secondary: #65676b; --primary: #4a7cfe; --primary-light: #6b93ff; --border: #dadde1; --safe-bottom: env(safe-area-inset-bottom, 0px); --radius: 12px; --radius-lg: 18px; }
     body { font-family: 'Inter', 'Nunito', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+    .hearts-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; display: none; }
+    .heart-particle { position: absolute; color: #ff0000; opacity: 0; font-size: 20px; animation: floatUp linear infinite; }
+    @keyframes floatUp { 0% { transform: translateY(100vh) rotate(0deg) scale(0); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.6; } 100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0; } }
     .auth-screen { background: var(--surface); padding: 32px 24px; border-radius: var(--radius-lg); box-shadow: 0 2px 8px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center; display: none; flex-direction: column; gap: 16px; z-index: 2; }
     .auth-screen.active { display: flex; }
     .auth-screen h2 { font-weight: 700; font-size: 1.8rem; color: var(--primary); margin-bottom: 8px; }
@@ -105,6 +108,8 @@
   </style>
 </head>
 <body>
+  <div class="hearts-bg" id="heartsBg"></div>
+  
   <div id="authScreen" class="auth-screen active">
     <h2 id="authTitle">Вход</h2>
     <input type="email" id="email" placeholder="Email" autocomplete="email">
@@ -162,6 +167,7 @@
     let editingGroupId = null, currentPostId = null, replyingTo = null, reminderMsgId = null, presenceInterval = null;
     let localStream = null, peerConnection = null, callInProgress = false, currentCallDocId = null, callDocListener = null;
     let storyInterval = null, currentStoryIndex = 0, currentStories = [];
+    let heartsInterval = null;
 
     const SYSTEM_BOTS = {
       'favorites-bot': { displayName: '⭐ Избранное', email: 'fav@sys', phone: '' },
@@ -181,8 +187,55 @@
       { name: '🌊 Океан', bg: '#0a1a2a', surface: '#112233', text: '#d0e0f0', textSecondary: '#90b0c0', primary: '#0ea5e9', primaryLight: '#38bdf8', border: '#1e3a5f' },
       { name: '☕ Карамель', bg: '#fef7ed', surface: '#fff8f0', text: '#4a3020', textSecondary: '#8a7060', primary: '#d97706', primaryLight: '#f59e0b', border: '#e5d0b0' },
       { name: '🌈 Радуга', bg: '#faf5ff', surface: '#ffffff', text: '#4a1942', textSecondary: '#7b5068', primary: '#c026d3', primaryLight: '#d946ef', border: '#e8d5f0', background: 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 30%, #a18cd1 70%, #fbc2eb 100%)' },
-      { name: '❤️ Андертейл', bg: '#000', surface: '#1a1a1a', text: '#fff', textSecondary: '#aaa', primary: '#ff0000', primaryLight: '#ff4444', border: '#333', font: 'Orbitron, sans-serif' }
+      { name: '❤️ Андертейл', bg: '#000000', surface: '#1a1a1a', text: '#ffffff', textSecondary: '#cccccc', primary: '#ff0000', primaryLight: '#ff4444', border: '#333333', font: 'Orbitron, sans-serif', hearts: true }
     ];
+
+    function startHearts() {
+      const container = document.getElementById('heartsBg');
+      if (!container) return;
+      container.style.display = 'block';
+      container.innerHTML = '';
+      
+      function createHeart() {
+        const heart = document.createElement('div');
+        heart.className = 'heart-particle';
+        heart.textContent = '❤️';
+        heart.style.left = Math.random() * 100 + '%';
+        heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+        heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+        heart.style.animationDelay = Math.random() * 2 + 's';
+        container.appendChild(heart);
+        
+        setTimeout(() => {
+          if (heart.parentNode) heart.remove();
+        }, 7000);
+      }
+      
+      // Создаем начальные сердечки
+      for (let i = 0; i < 15; i++) {
+        setTimeout(() => createHeart(), i * 300);
+      }
+      
+      // Создаем новые сердечки периодически
+      if (heartsInterval) clearInterval(heartsInterval);
+      heartsInterval = setInterval(() => {
+        if (container.style.display !== 'none') {
+          createHeart();
+        }
+      }, 500);
+    }
+
+    function stopHearts() {
+      const container = document.getElementById('heartsBg');
+      if (container) {
+        container.style.display = 'none';
+        container.innerHTML = '';
+      }
+      if (heartsInterval) {
+        clearInterval(heartsInterval);
+        heartsInterval = null;
+      }
+    }
 
     function applyTheme(themeName) {
       const theme = THEME_PRESETS.find(t => t.name === themeName) || THEME_PRESETS[0];
@@ -198,6 +251,14 @@
       else document.body.style.background = theme.bg;
       document.body.style.fontFamily = theme.font || 'Inter, Nunito, sans-serif';
       localStorage.setItem('theme', themeName);
+      
+      // Управление сердечками
+      if (theme.hearts) {
+        startHearts();
+      } else {
+        stopHearts();
+      }
+      
       updateThemeUI();
     }
 
@@ -1381,20 +1442,82 @@
       });
     }
 
+    async function createPeerConnection() {
+      peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+      
+      peerConnection.ontrack = (event) => {
+        const remoteAudio = document.getElementById('remoteAudio');
+        if (remoteAudio && event.streams[0]) {
+          remoteAudio.srcObject = event.streams[0];
+          remoteAudio.play().catch(e => console.warn('Audio play failed:', e));
+        }
+      };
+      
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate && currentCallDocId) {
+          db.collection('calls').doc(currentCallDocId).update({ 
+            candidates: firebase.firestore.FieldValue.arrayUnion(JSON.stringify(event.candidate)) 
+          });
+        }
+      };
+      
+      peerConnection.onconnectionstatechange = () => {
+        const statusEl = document.getElementById('callStatus');
+        if (statusEl && peerConnection) {
+          statusEl.textContent = { 
+            'connecting':'Подключение...',
+            'connected':'✅ Соединение установлено',
+            'disconnected':'⚠️ Разрыв',
+            'failed':'❌ Ошибка',
+            'closed':'Завершён' 
+          }[peerConnection.connectionState] || '';
+        }
+        if (peerConnection && (peerConnection.connectionState==='failed'||peerConnection.connectionState==='closed')) endCall();
+      };
+
+      peerConnection.onnegotiationneeded = async () => {
+        try {
+          if (!currentCallDocId) return;
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          await db.collection('calls').doc(currentCallDocId).update({ 
+            offer: JSON.stringify(offer) 
+          });
+        } catch (e) {
+          console.warn('Negotiation failed:', e);
+        }
+      };
+    }
+
     async function acceptIncomingCall(callDoc) {
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        callInProgress = true; currentCallDocId = callDoc.id;
+        callInProgress = true; 
+        currentCallDocId = callDoc.id;
         const data = callDoc.data();
+        
         await createPeerConnection();
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        
+        localStream.getTracks().forEach(track => {
+          peerConnection.addTrack(track, localStream);
+        });
+        
         await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.offer)));
+        
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
-        await callDoc.ref.update({ answer: JSON.stringify(answer), status: 'active' });
+        
+        await callDoc.ref.update({ 
+          answer: JSON.stringify(answer), 
+          status: 'active' 
+        });
+        
         listenCallDoc(callDoc.ref);
         showCallUI();
-      } catch (e) { console.error(e); endCall(); }
+      } catch (e) { 
+        console.error('Accept call error:', e); 
+        endCall(); 
+      }
     }
 
     window.startCall = async () => {
@@ -1418,39 +1541,49 @@
       } catch (e) { alert('Ошибка: '+e.message); endCall(); }
     };
 
-    async function createPeerConnection() {
-      peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-      peerConnection.ontrack = (event) => {
-        const remoteAudio = document.getElementById('remoteAudio');
-        if (remoteAudio && event.streams[0]) {
-          remoteAudio.srcObject = event.streams[0];
-          remoteAudio.play().catch(e => {});
-        }
-      };
-      peerConnection.onicecandidate = (event) => {
-        if (event.candidate && currentCallDocId) {
-          db.collection('calls').doc(currentCallDocId).update({ candidates: firebase.firestore.FieldValue.arrayUnion(JSON.stringify(event.candidate)) });
-        }
-      };
-      peerConnection.onconnectionstatechange = () => {
-        const statusEl = document.getElementById('callStatus');
-        if (statusEl && peerConnection) statusEl.textContent = { 'connecting':'Подключение...','connected':'✅ Соединение установлено','disconnected':'⚠️ Разрыв','failed':'❌ Ошибка','closed':'Завершён' }[peerConnection.connectionState] || '';
-        if (peerConnection && (peerConnection.connectionState==='failed'||peerConnection.connectionState==='closed')) endCall();
-      };
-    }
-
     function listenCallDoc(callDocRef) {
       if (callDocListener) callDocListener();
+      
       callDocListener = callDocRef.onSnapshot(async (doc) => {
         if (!doc.exists) { endCall(); return; }
         const data = doc.data();
+        
         if (data.status === 'ended') { endCall(); return; }
-        if (data.callerId === currentUser.uid && data.answer && peerConnection && peerConnection.signalingState !== 'stable') {
-          try { await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.answer))); } catch (e) { console.warn(e); }
+        
+        if (data.callerId === currentUser.uid && data.answer && peerConnection) {
+          try {
+            const remoteDesc = new RTCSessionDescription(JSON.parse(data.answer));
+            if (peerConnection.signalingState !== 'stable') {
+              await peerConnection.setRemoteDescription(remoteDesc);
+            }
+          } catch (e) { console.warn('Set remote answer error:', e); }
         }
+        
+        if (data.callerId !== currentUser.uid && data.offer && peerConnection) {
+          try {
+            const remoteDesc = new RTCSessionDescription(JSON.parse(data.offer));
+            if (peerConnection.signalingState !== 'stable') {
+              await peerConnection.setRemoteDescription(remoteDesc);
+              const answer = await peerConnection.createAnswer();
+              await peerConnection.setLocalDescription(answer);
+              await callDocRef.update({ answer: JSON.stringify(answer) });
+            }
+          } catch (e) { console.warn('Set remote offer error:', e); }
+        }
+        
         if (data.candidates && peerConnection) {
+          const currentCandidates = new Set();
           for (const c of data.candidates) {
-            try { await peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(c))); } catch (e) {}
+            try {
+              const candidate = new RTCIceCandidate(JSON.parse(c));
+              const candidateStr = JSON.stringify(candidate);
+              if (!currentCandidates.has(candidateStr)) {
+                currentCandidates.add(candidateStr);
+                await peerConnection.addIceCandidate(candidate);
+              }
+            } catch (e) {
+              console.warn('ICE candidate error:', e);
+            }
           }
         }
       });
@@ -1486,7 +1619,7 @@
     };
     function closeCallUI() { const modal = document.getElementById('callModal'); if (modal) modal.remove(); const notif = document.getElementById('incomingCallNotification'); if (notif) notif.remove(); }
 
-    console.log('✅ Мессенджер готов. 8 тем, все функции работают, звонки исправлены.');
+    console.log('✅ Мессенджер готов. 8 тем, все функции работают, звонки исправлены, тема Андертейл с сердечками добавлена.');
   </script>
 </body>
 </html>
