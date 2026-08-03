@@ -157,6 +157,16 @@
             to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
         }
 
+        /* Анимация шестерёнки — один оборот и стоп */
+        .gear-spin {
+            display: inline-block;
+            animation: spinOnce 1.2s cubic-bezier(0.25, 0.1, 0.15, 1) forwards;
+        }
+        @keyframes spinOnce {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .app {
             display: none;
         }
@@ -260,7 +270,7 @@
 
     <script>
         // =================================================================
-        // УВЕДОМЛЕНИЕ О ТЕХРАБОТАХ
+        // УВЕДОМЛЕНИЕ О ТЕХРАБОТАХ (шестерёнка — один оборот и стоп)
         // =================================================================
         let toastTimeout = null;
 
@@ -278,7 +288,7 @@
             toast.className = 'toast';
             toast.innerHTML = `
                 <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
-                    <span style="font-size:1.6rem;">⚙️</span>
+                    <span class="gear-spin" style="font-size:1.6rem;">⚙️</span>
                     <span><strong style="color:#a29bfe;font-size:1.1rem;">Технические работы</strong></span>
                     <span style="color:#6c5ce7;">|</span>
                     <span>Осталось <strong style="color:#feca57;font-size:1.2rem;">5</strong> этапов до полного релиза</span>
@@ -291,6 +301,14 @@
             `;
 
             document.body.appendChild(toast);
+
+            // Убираем анимацию после одного оборота (1.2 сек)
+            setTimeout(() => {
+                const gear = toast.querySelector('.gear-spin');
+                if (gear) {
+                    gear.style.animation = 'none';
+                }
+            }, 1300);
 
             toastTimeout = setTimeout(() => {
                 toast.style.opacity = '0';
@@ -361,7 +379,7 @@
 
         console.log('✅ CyberForce Messenger — Технические работы');
         console.log('📌 Осталось 5 этапов до полного релиза');
-        console.log('💡 Нажми "Войти", "Регистрация" или "Забыли пароль" — везде техработы');
+        console.log('⚙️ Шестерёнка: один оборот и стоп!');
     </script>
 
 </body>
